@@ -55,13 +55,12 @@ export class DustGenerator {
     const scales = new Float32Array(count);
     const randomnessArray = new Float32Array(count * 3);
 
-    // Bảng màu mây xanh lam phấn, xanh ngọc và lavender hòa quyện
+    // Bảng màu mây xanh lam khói thiên văn học trầm tối, dịu mắt chuẩn ảnh NASA
     const cloudPalettes = [
-      new THREE.Color('#93c5fd'), // Soft celestial blue
-      new THREE.Color('#60a5fa'), // Sky blue
-      new THREE.Color('#38bdf8'), // Ice cyan
-      new THREE.Color('#a5b4fc'), // Periwinkle lavender
-      new THREE.Color('#3b82f6')  // Royal blue
+      new THREE.Color('#4c6e9e'), // Mây xanh lam khói
+      new THREE.Color('#385682'), // Xanh denim trầm
+      new THREE.Color('#2d466e'), // Xanh đêm sâu
+      new THREE.Color('#58688a')  // Xám khói periwinkle
     ];
 
     for (let i = 0; i < count; i++) {
@@ -124,8 +123,8 @@ export class DustGenerator {
           vec4 mvPos = modelViewMatrix * vec4(finalPos, 1.0);
           gl_Position = projectionMatrix * mvPos;
 
-          // Mây bềnh bồng nhẹ nhàng
-          vAlpha = 0.16 + sin(uTime * 0.6 + dist * 0.1) * 0.03;
+          // Mây bềnh bồng nhẹ nhàng, độ trong suốt êm dịu không gắt
+          vAlpha = 0.11 + sin(uTime * 0.5 + dist * 0.1) * 0.02;
 
           gl_PointSize = aScale * (120.0 / -mvPos.z);
           gl_PointSize = clamp(gl_PointSize, 1.0, 48.0);
@@ -168,12 +167,12 @@ export class DustGenerator {
     const colors = new Float32Array(count * 3);
     const scales = new Float32Array(count);
 
-    // Màu vàng mật ong, vàng hoàng gia và hổ phách ấm áp
+    // Màu vàng cát, hổ phách dịu trầm chuẩn ảnh thiên văn học
     const barColors = [
-      new THREE.Color('#fef08a'), // Soft cream gold
-      new THREE.Color('#fcd34d'), // Warm gold
-      new THREE.Color('#f59e0b'), // Amber
-      new THREE.Color('#fbbf24')  // Champagne
+      new THREE.Color('#d4b476'), // Vàng cát trầm
+      new THREE.Color('#b89045'), // Hổ phách dịu
+      new THREE.Color('#c99d52'), // Champagne cổ điển
+      new THREE.Color('#9e7530')  // Nâu vàng dịu
     ];
 
     // Thanh chắn elip nghiêng ~35 độ giống hệt ảnh mẫu
@@ -230,7 +229,7 @@ export class DustGenerator {
           vec4 mvPos = modelViewMatrix * vec4(rotatedPos, 1.0);
           gl_Position = projectionMatrix * mvPos;
 
-          vAlpha = 0.18 + sin(uTime * 0.8 + dist * 0.2) * 0.03;
+          vAlpha = 0.12 + sin(uTime * 0.7 + dist * 0.2) * 0.02;
           gl_PointSize = aScale * (120.0 / -mvPos.z);
           gl_PointSize = clamp(gl_PointSize, 1.0, 44.0);
         }

@@ -10,14 +10,14 @@ export function createComposer(renderer, scene, camera) {
   const renderPass = new RenderPass(scene, camera);
   composer.addPass(renderPass);
 
-  // Unreal Bloom Pass tuned for high contrast:
-  // Higher threshold (0.32) ensures background remains deep void black and colors stay rich & saturated
-  // Strength (0.95) provides magical celestial aura without blowing out the galaxy into pure white
+  // Unreal Bloom Pass tinh chỉnh màu tối, dịu mắt chuẩn ảnh thiên văn:
+  // Threshold cao (0.55) và Strength thấp (0.28) để loại bỏ hoàn toàn hiện tượng chói mắt,
+  // giữ nền đen sâu thẳm và dải mây màu trầm tối huyền bí
   const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(window.innerWidth, window.innerHeight),
-    0.95,  // strength (vừa phải, sắc nét, không bị chói lóa)
-    0.65,  // radius
-    0.32   // threshold (chỉ phần nhân cực sáng mới phát hào quang, giữ rõ các nhánh xoắn)
+    0.28,  // strength thấp dịu nhẹ, không bị chói sáng
+    0.45,  // radius
+    0.55   // threshold cao, chỉ phát sáng cực nhẹ ở tâm
   );
 
   composer.addPass(bloomPass);

@@ -2,49 +2,49 @@ import * as THREE from 'three';
 
 export const COLOR_THEMES = {
   cosmic: {
-    name: 'Electric Blue & Cyan (Chuẩn ảnh mẫu)',
-    core: '#e0faff',
-    coreGlow: '#00f5ff',
-    innerArm: '#0077ff',
-    outerArm: '#1033ee',
-    accentArm: '#d946ef',
-    dust: '#050a1f'
-  },
-  neon: {
-    name: 'Cyberpunk Neon (Hồng & Lam tương phản)',
-    core: '#ffffff',
-    coreGlow: '#ff007f',
-    innerArm: '#00f0ff',
-    outerArm: '#6000e0',
-    accentArm: '#ff00b7',
-    dust: '#120024'
+    name: 'NASA Milky Way (Tối & Dịu mắt)',
+    core: '#e8d5a3',
+    coreGlow: '#d4af37',
+    innerArm: '#5a82c4',
+    outerArm: '#2c4a87',
+    accentArm: '#b83258',
+    dust: '#02040d'
   },
   andromeda: {
     name: 'Andromeda Cyan (Biển trời Ngân hà)',
-    core: '#e0f2fe',
-    coreGlow: '#38bdf8',
-    innerArm: '#0284c7',
-    outerArm: '#1e3a8a',
-    accentArm: '#818cf8',
-    dust: '#030712'
+    core: '#c8e2f8',
+    coreGlow: '#2980b9',
+    innerArm: '#1f618d',
+    outerArm: '#154360',
+    accentArm: '#6c5ce7',
+    dust: '#010408'
   },
   golden: {
-    name: 'Solar Gold (Vàng hoàng gia & Lửa sao)',
-    core: '#ffffff',
-    coreGlow: '#fef08a',
-    innerArm: '#f59e0b',
-    outerArm: '#b45309',
-    accentArm: '#ea580c',
-    dust: '#1c1917'
+    name: 'Solar Gold (Vàng hổ phách cổ điển)',
+    core: '#f5cba7',
+    coreGlow: '#d35400',
+    innerArm: '#b9770e',
+    outerArm: '#7e5109',
+    accentArm: '#922b21',
+    dust: '#0a0502'
+  },
+  neon: {
+    name: 'Cyberpunk Neon (Tương phản nhẹ)',
+    core: '#f5eeea',
+    coreGlow: '#e84393',
+    innerArm: '#0984e3',
+    outerArm: '#6c5ce7',
+    accentArm: '#fd79a8',
+    dust: '#080012'
   },
   realistic: {
-    name: 'Astrophysical (Thực tế Thiên văn)',
-    core: '#ffeedd',
-    coreGlow: '#dbeafe',
-    innerArm: '#60a5fa',
-    outerArm: '#1e40af',
-    accentArm: '#93c5fd',
-    dust: '#020617'
+    name: 'Astrophysical (Thực tế Thiên văn học)',
+    core: '#e2d4bc',
+    coreGlow: '#85929e',
+    innerArm: '#5d6d7e',
+    outerArm: '#283747',
+    accentArm: '#78281f',
+    dust: '#020408'
   }
 };
 
@@ -55,22 +55,18 @@ export class GalaxyGenerator {
     this.geometry = null;
     this.material = null;
 
-    this.bokehMesh = null;
-    this.bokehGeo = null;
-    this.bokehMat = null;
-
-    // Chế độ thanh thoát mặc định (ít sao, gọn gàng, tâm không bị to hay trắng xóa)
+    // Chế độ tối, thanh thoát, sao nhỏ li ti dịu nhẹ như ảnh thiên văn NASA
     this.parameters = {
-      count: 45000,
-      size: 0.013,
+      count: 36000,      // Số lượng sao vừa đủ, không bị dày đặc
+      size: 0.009,       // Kích thước sao siêu nhỏ li ti
       radius: 120,
       branches: 4,
       spin: 1.65,
       randomness: 0.28,
-      power: 1.9,       // Tỉ lệ đều khắp đĩa xoắn ốc, không bị dồn cục ở giữa
-      coreRadius: 6.0,   // Tâm nhỏ gọn, tinh tế
+      power: 1.9,
+      coreRadius: 6.0,
       currentTheme: 'cosmic',
-      speed: 0.28
+      speed: 0.24
     };
 
     this.init();
@@ -78,7 +74,6 @@ export class GalaxyGenerator {
 
   init() {
     this.generate();
-    this.generateBokehOrbs();
   }
 
   generate(customParams = {}) {
@@ -97,16 +92,8 @@ export class GalaxyGenerator {
       spin,
       randomness,
       power,
-      coreRadius,
-      currentTheme
+      coreRadius
     } = this.parameters;
-
-    const theme = COLOR_THEMES[currentTheme] || COLOR_THEMES.cosmic;
-    const colorCore = new THREE.Color(theme.core);
-    const colorCoreGlow = new THREE.Color(theme.coreGlow);
-    const colorInner = new THREE.Color(theme.innerArm);
-    const colorOuter = new THREE.Color(theme.outerArm);
-    const colorAccent = new THREE.Color(theme.accentArm);
 
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
@@ -114,33 +101,44 @@ export class GalaxyGenerator {
     const randomnessArray = new Float32Array(count * 3);
     const twinkleSpeeds = new Float32Array(count);
 
+    // Bảng màu sao trầm, dịu, không gắt
+    const goldBarStars = [
+      new THREE.Color('#d4b476'), // Vàng cát trầm
+      new THREE.Color('#c99d52'), // Hổ phách dịu
+      new THREE.Color('#e0caa0')  // Kem champagne trầm
+    ];
+
+    const armStarPalette = [
+      new THREE.Color('#789ac7'), // Xanh lam dịu
+      new THREE.Color('#5878ab'), // Xanh denim trầm
+      new THREE.Color('#9bb6dc'), // Bạc xanh
+      new THREE.Color('#c2546e')  // Đốm hồng ngọc nhỏ
+    ];
+
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
 
-      // Phân bố đều dọc theo toàn bộ các nhánh xoắn ốc
       const rRatio = Math.pow(Math.random(), power);
       const r = rRatio * radius;
 
       const branchAngle = ((i % branches) / branches) * Math.PI * 2;
       const spinAngle = r * spin * 0.055;
 
-      // Đĩa ngân hà phẳng và mỏng gọn, không bị phình to
-      const heightDispersion = Math.max(0.06, (1.0 - rRatio * 0.8)) * randomness * 3.8;
+      const heightDispersion = Math.max(0.05, (1.0 - rRatio * 0.8)) * randomness * 3.2;
 
-      const randomX = Math.pow(Math.random(), 2.2) * (Math.random() < 0.5 ? 1 : -1) * randomness * r * 0.32;
+      const randomX = Math.pow(Math.random(), 2.2) * (Math.random() < 0.5 ? 1 : -1) * randomness * r * 0.3;
       const randomY = (Math.random() - 0.5) * heightDispersion;
-      const randomZ = Math.pow(Math.random(), 2.2) * (Math.random() < 0.5 ? 1 : -1) * randomness * r * 0.32;
+      const randomZ = Math.pow(Math.random(), 2.2) * (Math.random() < 0.5 ? 1 : -1) * randomness * r * 0.3;
 
       randomnessArray[i3] = randomX;
       randomnessArray[i3 + 1] = randomY;
       randomnessArray[i3 + 2] = randomZ;
 
       if (r < coreRadius) {
-        // Sao vùng thanh chắn trung tâm: mang sắc vàng mật ong và kem champagne ấm áp
+        // Sao vùng thanh chắn trung tâm: sắc vàng cát dịu nhẹ
         const theta = Math.random() * Math.PI * 2;
         const coreDist = Math.sqrt(Math.random()) * coreRadius;
 
-        // Thanh chắn kéo nhẹ theo chiều nghiêng
         const barAngle = Math.PI * 0.19;
         const cosB = Math.cos(barAngle);
         const sinB = Math.sin(barAngle);
@@ -148,46 +146,28 @@ export class GalaxyGenerator {
         const bz = coreDist * Math.sin(theta) * 0.7;
 
         positions[i3] = bx * cosB - bz * sinB;
-        positions[i3 + 1] = (Math.random() - 0.5) * 1.2;
+        positions[i3 + 1] = (Math.random() - 0.5) * 1.0;
         positions[i3 + 2] = bx * sinB + bz * cosB;
 
-        // Màu vàng kem, vàng mật ong ấm áp hài hòa với dải mây thanh chắn
-        const goldColors = [
-          new THREE.Color('#fef08a'),
-          new THREE.Color('#fcd34d'),
-          new THREE.Color('#fbbf24')
-        ];
-        const c = goldColors[Math.floor(Math.random() * goldColors.length)];
+        const c = goldBarStars[Math.floor(Math.random() * goldBarStars.length)];
         colors[i3] = c.r;
         colors[i3 + 1] = c.g;
         colors[i3 + 2] = c.b;
       } else {
-        // Sao dọc các nhánh xoắn ốc: nằm gọn gàng bên trong dải mây xanh lam
+        // Sao dọc nhánh: nhỏ li ti điểm xuyết nhẹ nhàng trong dải mây
         positions[i3] = Math.cos(branchAngle + spinAngle) * r;
         positions[i3 + 1] = 0;
         positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * r;
 
-        // Màu sao xanh lam sáng, kim cương trắng xanh và điểm xuyết đỏ hồng HII
-        const rand = Math.random();
-        let c;
-        if (rand > 0.88) {
-          c = new THREE.Color('#f43f5e'); // Đốm hồng ngọc vườn ươm sao
-        } else if (rand > 0.65) {
-          c = new THREE.Color('#e0f2fe'); // Sao kim cương trắng xanh
-        } else if (rand > 0.35) {
-          c = new THREE.Color('#93c5fd'); // Xanh lam mềm mại
-        } else {
-          c = new THREE.Color('#60a5fa'); // Xanh thiên thanh
-        }
-
+        const c = armStarPalette[Math.floor(Math.random() * armStarPalette.length)];
         colors[i3] = c.r;
         colors[i3 + 1] = c.g;
         colors[i3 + 2] = c.b;
       }
 
-      // Kích thước hạt sao nhỏ gọn, sắc sảo
-      scales[i] = 0.55 + Math.random() * 0.95;
-      twinkleSpeeds[i] = 1.0 + Math.random() * 3.0;
+      // Kích thước hạt sao nhỏ gọn như hạt bụi kim cương li ti
+      scales[i] = 0.4 + Math.random() * 0.6;
+      twinkleSpeeds[i] = 0.8 + Math.random() * 2.2;
     }
 
     this.geometry = new THREE.BufferGeometry();
@@ -228,11 +208,12 @@ export class GalaxyGenerator {
           vec4 viewPosition = viewMatrix * modelPosition;
           gl_Position = projectionMatrix * viewPosition;
 
-          float twinkle = sin(uTime * aTwinkleSpeed + finalPos.x * 0.35 + finalPos.z * 0.35) * 0.2 + 0.8;
+          float twinkle = sin(uTime * aTwinkleSpeed + finalPos.x * 0.35 + finalPos.z * 0.35) * 0.18 + 0.82;
           vTwinkle = twinkle;
 
-          gl_PointSize = uSize * aScale * twinkle * (200.0 / -viewPosition.z);
-          gl_PointSize = clamp(gl_PointSize, 1.0, 14.0);
+          // Hạt sao nhỏ thanh mảnh, không chói
+          gl_PointSize = uSize * aScale * twinkle * (170.0 / -viewPosition.z);
+          gl_PointSize = clamp(gl_PointSize, 1.0, 8.0);
         }
       `,
       fragmentShader: `
@@ -243,14 +224,13 @@ export class GalaxyGenerator {
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
 
-          float intensity = exp(-dist * 11.0) * 1.3;
-          float halo = (1.0 - smoothstep(0.0, 0.5, dist)) * 0.45;
-          float strength = intensity + halo;
+          // Đốm sao thanh mảnh, độ sáng 0.42 dịu mắt
+          float intensity = (1.0 - smoothstep(0.0, 0.5, dist));
+          intensity = pow(intensity, 2.0);
 
-          // Màu sắc giữ nguyên độ bão hòa rực rỡ, không bị chói trắng
-          vec3 finalColor = vColor * strength * vTwinkle;
+          vec3 finalColor = vColor * intensity * vTwinkle * 0.55;
 
-          gl_FragColor = vec4(finalColor, strength);
+          gl_FragColor = vec4(finalColor, intensity * 0.65);
         }
       `,
       depthWrite: false,
@@ -259,7 +239,7 @@ export class GalaxyGenerator {
       transparent: true,
       uniforms: {
         uTime: { value: 0 },
-        uSize: { value: 14.0 * window.devicePixelRatio },
+        uSize: { value: 5.5 * window.devicePixelRatio },
         uSpeed: { value: this.parameters.speed }
       }
     });
@@ -268,120 +248,10 @@ export class GalaxyGenerator {
     this.scene.add(this.points);
   }
 
-  // 800 Hạt Bokeh quang học mộng mơ
-  generateBokehOrbs() {
-    if (this.bokehMesh !== null) {
-      this.bokehGeo.dispose();
-      this.bokehMat.dispose();
-      this.scene.remove(this.bokehMesh);
-    }
-
-    const bokehCount = 800;
-    const positions = new Float32Array(bokehCount * 3);
-    const colors = new Float32Array(bokehCount * 3);
-    const scales = new Float32Array(bokehCount);
-    const phases = new Float32Array(bokehCount);
-
-    const bokehPalettes = [
-      new THREE.Color('#00f5ff'),
-      new THREE.Color('#38bdf8'),
-      new THREE.Color('#3b82f6'),
-      new THREE.Color('#818cf8'),
-      new THREE.Color('#c084fc'),
-      new THREE.Color('#34d399')
-    ];
-
-    for (let i = 0; i < bokehCount; i++) {
-      const i3 = i * 3;
-
-      const r = 10 + Math.pow(Math.random(), 1.7) * 110;
-      const angle = Math.random() * Math.PI * 2;
-      const h = (Math.random() - 0.5) * 18.0;
-
-      positions[i3] = Math.cos(angle) * r;
-      positions[i3 + 1] = h;
-      positions[i3 + 2] = Math.sin(angle) * r;
-
-      const c = bokehPalettes[Math.floor(Math.random() * bokehPalettes.length)];
-      colors[i3] = c.r;
-      colors[i3 + 1] = c.g;
-      colors[i3 + 2] = c.b;
-
-      scales[i] = 14.0 + Math.random() * 26.0;
-      phases[i] = Math.random() * Math.PI * 2;
-    }
-
-    this.bokehGeo = new THREE.BufferGeometry();
-    this.bokehGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    this.bokehGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    this.bokehGeo.setAttribute('aScale', new THREE.BufferAttribute(scales, 1));
-    this.bokehGeo.setAttribute('aPhase', new THREE.BufferAttribute(phases, 1));
-
-    this.bokehMat = new THREE.ShaderMaterial({
-      vertexShader: `
-        uniform float uTime;
-        attribute float aScale;
-        attribute float aPhase;
-        varying vec3 vColor;
-        varying float vAlpha;
-
-        void main() {
-          vColor = color;
-
-          vec3 p = position;
-          p.y += sin(uTime * 0.7 + aPhase) * 1.2;
-
-          float angle = uTime * 0.03;
-          float cosA = cos(angle);
-          float sinA = sin(angle);
-          float nx = p.x * cosA - p.z * sinA;
-          float nz = p.x * sinA + p.z * cosA;
-          p.x = nx;
-          p.z = nz;
-
-          vec4 mvPos = modelViewMatrix * vec4(p, 1.0);
-          gl_Position = projectionMatrix * mvPos;
-
-          vAlpha = 0.32 + sin(uTime * 1.1 + aPhase) * 0.1;
-
-          gl_PointSize = aScale * (110.0 / -mvPos.z);
-          gl_PointSize = clamp(gl_PointSize, 2.0, 42.0);
-        }
-      `,
-      fragmentShader: `
-        varying vec3 vColor;
-        varying float vAlpha;
-
-        void main() {
-          float dist = length(gl_PointCoord - vec2(0.5));
-          if (dist > 0.5) discard;
-
-          float edge = smoothstep(0.5, 0.42, dist);
-          float rim = smoothstep(0.25, 0.46, dist) * 0.55;
-          float body = (1.0 - smoothstep(0.0, 0.45, dist)) * 0.35;
-          float bokeh = (edge * 0.35 + rim + body);
-
-          gl_FragColor = vec4(vColor, bokeh * vAlpha);
-        }
-      `,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-      vertexColors: true,
-      transparent: true,
-      uniforms: {
-        uTime: { value: 0 }
-      }
-    });
-
-    this.bokehMesh = new THREE.Points(this.bokehGeo, this.bokehMat);
-    this.scene.add(this.bokehMesh);
-  }
-
   setTheme(themeKey) {
     if (COLOR_THEMES[themeKey]) {
       this.parameters.currentTheme = themeKey;
       this.generate();
-      this.generateBokehOrbs();
     }
   }
 
@@ -400,9 +270,6 @@ export class GalaxyGenerator {
   update(elapsedTime) {
     if (this.material && this.material.uniforms.uTime) {
       this.material.uniforms.uTime.value = elapsedTime;
-    }
-    if (this.bokehMat && this.bokehMat.uniforms.uTime) {
-      this.bokehMat.uniforms.uTime.value = elapsedTime;
     }
   }
 }
