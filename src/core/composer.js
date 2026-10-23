@@ -15,9 +15,9 @@ export function createComposer(renderer, scene, camera) {
   // giữ nền đen sâu thẳm và dải mây màu trầm tối huyền bí
   const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(window.innerWidth, window.innerHeight),
-    0.28,  // strength thấp dịu nhẹ, không bị chói sáng
-    0.45,  // radius
-    0.55   // threshold cao, chỉ phát sáng cực nhẹ ở tâm
+    0.52,  // strength vừa vặn làm nổi bật dải mây
+    0.55,  // radius
+    0.35   // threshold phù hợp cho dải mây phát sáng dịu
   );
 
   composer.addPass(bloomPass);

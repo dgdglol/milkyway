@@ -26,7 +26,7 @@ export function createScene(canvas) {
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 0.82; // Tone trầm tối, dịu mắt chuẩn ảnh thiên văn học
+  renderer.toneMappingExposure = 1.02; // Tăng độ phơi sáng để dải mây hiện rõ nét
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   // Background deep space stars (nhẹ nhàng, mờ ảo xa xôi)
