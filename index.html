@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Milky Way 3D - Dải Ngân Hà Siêu Thực & Huyền Ảo</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <!-- 3D Canvas -->
+    <canvas id="webgl"></canvas>
+
+    <!-- 3D Projected Landmark DOM Badges -->
+    <div id="landmarks-container"></div>
+
+    <!-- UI Overlay HUD -->
+    <div class="hud-overlay">
+      <!-- Top Navigation Bar -->
+      <header class="hud-header">
+        <div class="brand">
+          <div class="brand-symbol"></div>
+          <div>
+            <h1 class="brand-title">MILKY WAY <span>3D</span></h1>
+            <p class="brand-subtitle">Dải Ngân Hà Siêu Thực & Huyền Ảo</p>
+          </div>
+        </div>
+
+        <!-- Telemetry Stats -->
+        <div class="telemetry">
+          <div class="stat-pill">
+            <span class="stat-label">FPS</span>
+            <span class="stat-value" id="stat-fps">60</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-label">SỐ LƯỢNG SAO</span>
+            <span class="stat-value" id="stat-stars">200.000</span>
+          </div>
+        </div>
+
+        <!-- Header Actions -->
+        <div class="header-actions">
+          <button id="btn-audio" class="btn-glass" title="Bật/Tắt âm thanh vũ trụ">
+            <span class="icon">🔇</span>
+            <span>Âm thanh</span>
+          </button>
+          <button id="btn-screenshot" class="btn-glass" title="Chụp ảnh HD tải về">
+            <span class="icon">📸</span>
+            <span>Chụp ảnh</span>
+          </button>
+          <button id="btn-info" class="btn-glass" title="Thông tin thiên văn Dải Ngân Hà">
+            <span class="icon">ℹ️</span>
+            <span>Thông tin</span>
+          </button>
+          <button id="btn-fullscreen" class="btn-glass icon-only" title="Toàn màn hình">
+            <span class="icon">⛶</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Tour Active Notification Toast -->
+      <div id="tour-toast" class="tour-toast">
+        <div class="tour-beacon"></div>
+        <div>
+          <div class="tour-toast-title">CHUYẾN DU HÀNH ĐIỆN ẢNH (CINEMATIC TOUR)</div>
+          <div class="tour-toast-step" id="tour-step-text">Đang tải chặng bay...</div>
+        </div>
+      </div>
+
+      <!-- Quick Teleport Bar (Bottom Center) -->
+      <nav class="quick-nav">
+        <button class="nav-btn active" data-preset="overview">
+          <span class="icon">🌌</span>
+          <span>Toàn cảnh</span>
+        </button>
+        <button class="nav-btn" data-preset="solarsystem">
+          <span class="icon">☀️</span>
+          <span>Hệ Mặt Trời</span>
+        </button>
+        <button class="nav-btn" data-preset="blackhole">
+          <span class="icon">🕳️</span>
+          <span>Sagittarius A*</span>
+        </button>
+        <button class="nav-btn" data-preset="topdown">
+          <span class="icon">🧭</span>
+          <span>Bản đồ xoắn</span>
+        </button>
+        <button class="nav-btn tour-btn" id="btn-tour">
+          <span class="icon">🛸</span>
+          <span>Cinematic Tour</span>
+        </button>
+      </nav>
+
+      <!-- Toggle Panel Button (Mobile / Quick access) -->
+      <button id="btn-toggle-panel" class="btn-toggle-panel">
+        ⚙️ Bảng Điều Khiển
+      </button>
+
+      <!-- Collapsible Floating Controls Panel -->
+      <aside id="control-panel" class="control-panel">
+        <div class="panel-header">
+          <h3>BỘ ĐIỀU KHIỂN THIÊN HÀ</h3>
+          <span class="badge-live">LIVE</span>
+        </div>
+
+        <div class="panel-body">
+          <!-- Color Theme Selection -->
+          <div class="control-group">
+            <label for="select-theme">Màu Sắc Vũ Trụ (Color Palette)</label>
+            <div class="select-wrapper">
+              <select id="select-theme">
+                <option value="cosmic">Cosmic Violet (Tím mộng mơ & Xanh Cyan)</option>
+                <option value="andromeda">Andromeda Cyan (Biển trời Ngân hà)</option>
+                <option value="golden">Solar Gold (Vàng hoàng gia & Lửa sao)</option>
+                <option value="neon">Cyberpunk Neon (Hồng & Lam tương phản)</option>
+                <option value="realistic">Astrophysical (Thực tế Thiên văn học)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Star Density -->
+          <div class="control-group">
+            <label>Mật Độ Sao (Particles)</label>
+            <div class="button-segmented">
+              <button data-stars="80000">80K (Nhẹ)</button>
+              <button data-stars="150000">150K</button>
+              <button data-stars="200000" class="active">200K</button>
+              <button data-stars="250000">250K (Siêu dày)</button>
+            </div>
+          </div>
+
+          <!-- Rotation Speed Slider -->
+          <div class="control-group">
+            <div class="label-with-val">
+              <label for="slider-speed">Tốc Độ Xoay</label>
+              <span id="val-speed" class="val-tag">0.35x</span>
+            </div>
+            <input type="range" id="slider-speed" min="0" max="1.5" step="0.05" value="0.35" />
+          </div>
+
+          <!-- Bloom Intensity Slider -->
+          <div class="control-group">
+            <div class="label-with-val">
+              <label for="slider-bloom">Độ Sáng Hào Quang (Bloom)</label>
+              <span id="val-bloom" class="val-tag">1.6</span>
+            </div>
+            <input type="range" id="slider-bloom" min="0.4" max="3.0" step="0.1" value="1.6" />
+          </div>
+
+          <!-- Visual Toggles -->
+          <div class="control-group toggles-group">
+            <label class="toggle-checkbox">
+              <input type="checkbox" id="check-dust" checked />
+              <span class="custom-check"></span>
+              <span>Mây bụi tinh vân (Nebula Clouds)</span>
+            </label>
+            <label class="toggle-checkbox">
+              <input type="checkbox" id="check-labels" checked />
+              <span class="custom-check"></span>
+              <span>Nhãn & Tọa độ 3D</span>
+            </label>
+            <label class="toggle-checkbox">
+              <input type="checkbox" id="check-jets" checked />
+              <span class="custom-check"></span>
+              <span>Tia cực lỗ đen (Relativistic Jets)</span>
+            </label>
+          </div>
+
+          <div class="instruction-box">
+            💡 <strong>Hướng dẫn</strong>: Giữ chuột trái & kéo để xoay 360°, cuộn chuột để phóng to/thu nhỏ, click vào các nhãn trên màn hình để bay tới điểm đó.
+          </div>
+        </div>
+      </aside>
+
+      <!-- Astronomical Info Modal -->
+      <div id="info-modal" class="modal-backdrop">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div class="modal-title-group">
+              <span class="modal-icon">🌌</span>
+              <div>
+                <h2>DẢI NGÂN HÀ (MILKY WAY GALAXY)</h2>
+                <p>Kho lưu trữ dữ liệu thiên văn học thực tế</p>
+              </div>
+            </div>
+            <button id="btn-close-info" class="btn-close">✕</button>
+          </div>
+
+          <div class="modal-body">
+            <div class="fact-grid">
+              <div class="fact-card">
+                <div class="fact-num">100.000</div>
+                <div class="fact-unit">Năm ánh sáng</div>
+                <div class="fact-desc">Đường kính ước tính của đĩa thiên hà</div>
+              </div>
+              <div class="fact-card">
+                <div class="fact-num">100 - 400</div>
+                <div class="fact-unit">Tỷ ngôi sao</div>
+                <div class="fact-desc">Số lượng các vì sao tồn tại trong Dải Ngân Hà</div>
+              </div>
+              <div class="fact-card">
+                <div class="fact-num">4.3 Triệu</div>
+                <div class="fact-unit">Khối lượng Mặt Trời</div>
+                <div class="fact-desc">Lỗ đen siêu lớn Sagittarius A* ở tâm</div>
+              </div>
+              <div class="fact-card">
+                <div class="fact-num">~26.000</div>
+                <div class="fact-unit">Năm ánh sáng</div>
+                <div class="fact-desc">Khoảng cách từ Trái Đất đến tâm Ngân Hà</div>
+              </div>
+            </div>
+
+            <div class="modal-text">
+              <h3>Vị trí của chúng ta trong vũ trụ</h3>
+              <p>
+                Hệ Mặt Trời của chúng ta nằm ở nhánh phụ <strong>Orion Spur</strong> (Nhánh Orion), nằm kẹp giữa hai nhánh xoắn ốc khổng lồ là Perseus và Sagittarius. Mặt Trời cùng các hành tinh đang quay quanh tâm Dải Ngân Hà với tốc độ xấp xỉ <strong>828.000 km/h</strong>, mất khoảng <strong>230 triệu năm</strong> để hoàn thành một vòng quỹ đạo (gọi là một năm vũ trụ - Cosmic Year).
+              </p>
+              <h3>Trải nghiệm mô phỏng</h3>
+              <p>
+                Trang web này sử dụng <strong>Three.js WebGL</strong> kết hợp hiệu ứng phát sáng đa tầng <strong>UnrealBloom</strong> và các thuật toán phân bố hình học xoắn ốc logarithmic để tái hiện chân thực mật độ sao, mây bụi tinh vân và lỗ đen siêu khối lượng.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Script Entry -->
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
