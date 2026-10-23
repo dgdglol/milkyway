@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { ARM_PROFILES } from './dustGenerator.js';
 
 export const COLOR_THEMES = {
   cosmic: {
@@ -57,14 +58,13 @@ export class GalaxyGenerator {
 
     // Chế độ tối, thanh thoát, sao nhỏ li ti dịu nhẹ như Cosmoscope
     this.parameters = {
-      count: 36000,      // Số lượng sao vừa đủ, không bị dày đặc
+      count: 38000,      // Số lượng sao vừa vặn, tinh tế
       size: 0.008,       // Kích thước sao siêu nhỏ li ti
       radius: 120,
-      branches: 4,
       spin: 1.65,
       randomness: 0.28,
-      power: 1.9,
-      coreRadius: 6.0,
+      power: 1.85,
+      coreRadius: 6.5,
       currentTheme: 'cosmic',
       speed: 0.24
     };
@@ -88,9 +88,7 @@ export class GalaxyGenerator {
     const {
       count,
       radius,
-      branches,
       spin,
-      randomness,
       power,
       coreRadius
     } = this.parameters;
@@ -101,7 +99,7 @@ export class GalaxyGenerator {
     const randomnessArray = new Float32Array(count * 3);
     const twinkleSpeeds = new Float32Array(count);
 
-    // Bảng màu sao trầm, dịu, ấm vàng tự nhiên như ảnh Cosmoscope & Hubble
+    // Bảng màu sao ấm áp, dịu dàng chuẩn thiên văn học (G, K, M và F/A dwarf stars)
     const goldBarStars = [
       new THREE.Color('#d4a853'), // Vàng hổ phách sáng nhẹ
       new THREE.Color('#be8d3d'), // Hổ phách ấm
@@ -117,27 +115,26 @@ export class GalaxyGenerator {
       new THREE.Color('#a84b5c')  // Hồng ngọc mờ (vùng tạo sao H II)
     ];
 
+    const interArmPalette = [
+      new THREE.Color('#caa05c'), // Sao lùn vàng dịu (G-type như Mặt Trời)
+      new THREE.Color('#a8874f'), // Sao lùn cam (K-type)
+      new THREE.Color('#7a97bf'), // Sao xanh xám dịu
+      new THREE.Color('#98adc9'), // Bạc ánh xanh
+      new THREE.Color('#e0ceaa')  // Kem dịu
+    ];
+
+    // Phân bổ 3 quần thể sao tự nhiên:
+    // 1. Sao thanh chắn trung tâm (Core & Bar): ~12%
+    // 2. Sao nhánh xoắn chính (Organic Spiral Arms): ~60%
+    // 3. Sao rải rác giữa các dải sao (Inter-arm Field Stars): ~28%
+    const coreCount = Math.floor(count * 0.12);
+    const armCount = Math.floor(count * 0.60);
+
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
 
-      const rRatio = Math.pow(Math.random(), power);
-      const r = rRatio * radius;
-
-      const branchAngle = ((i % branches) / branches) * Math.PI * 2;
-      const spinAngle = r * spin * 0.055;
-
-      const heightDispersion = Math.max(0.05, (1.0 - rRatio * 0.8)) * randomness * 3.2;
-
-      const randomX = Math.pow(Math.random(), 2.2) * (Math.random() < 0.5 ? 1 : -1) * randomness * r * 0.3;
-      const randomY = (Math.random() - 0.5) * heightDispersion;
-      const randomZ = Math.pow(Math.random(), 2.2) * (Math.random() < 0.5 ? 1 : -1) * randomness * r * 0.3;
-
-      randomnessArray[i3] = randomX;
-      randomnessArray[i3 + 1] = randomY;
-      randomnessArray[i3 + 2] = randomZ;
-
-      if (r < coreRadius) {
-        // Sao vùng thanh chắn trung tâm: sắc vàng cát dịu nhẹ
+      if (i < coreCount) {
+        // 1. Sao vùng thanh chắn trung tâm: ánh vàng hổ phách ấm dịu
         const theta = Math.random() * Math.PI * 2;
         const coreDist = Math.sqrt(Math.random()) * coreRadius;
 
@@ -148,28 +145,75 @@ export class GalaxyGenerator {
         const bz = coreDist * Math.sin(theta) * 0.7;
 
         positions[i3] = bx * cosB - bz * sinB;
-        positions[i3 + 1] = (Math.random() - 0.5) * 1.0;
+        positions[i3 + 1] = (Math.random() - 0.5) * 1.2;
         positions[i3 + 2] = bx * sinB + bz * cosB;
+
+        randomnessArray[i3] = (Math.random() - 0.5) * 0.4;
+        randomnessArray[i3 + 1] = (Math.random() - 0.5) * 0.3;
+        randomnessArray[i3 + 2] = (Math.random() - 0.5) * 0.4;
 
         const c = goldBarStars[Math.floor(Math.random() * goldBarStars.length)];
         colors[i3] = c.r;
         colors[i3 + 1] = c.g;
         colors[i3 + 2] = c.b;
-      } else {
-        // Sao dọc nhánh: nhỏ li ti điểm xuyết nhẹ nhàng trong dải mây
-        positions[i3] = Math.cos(branchAngle + spinAngle) * r;
+
+        scales[i] = 0.45 + Math.random() * 0.55;
+        twinkleSpeeds[i] = 0.8 + Math.random() * 2.2;
+      } else if (i < coreCount + armCount) {
+        // 2. Sao trên các nhánh xoắn hữu cơ: độ rộng to nhỏ tùy hứng, góc không cách đều
+        const armIdx = (i - coreCount) % ARM_PROFILES.length;
+        const arm = ARM_PROFILES[armIdx];
+
+        const rRatio = Math.pow(Math.random(), power);
+        const r = coreRadius + rRatio * (radius - coreRadius);
+
+        const spinAngle = r * spin * arm.spinFactor * 0.054 + Math.sin(r * 0.08) * 0.12;
+        const angle = arm.baseAngle + spinAngle;
+
+        positions[i3] = Math.cos(angle) * r;
         positions[i3 + 1] = 0;
-        positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * r;
+        positions[i3 + 2] = Math.sin(angle) * r;
+
+        // Xòe theo độ rộng to nhỏ tùy hứng của từng nhánh
+        const armSpread = arm.width(r, rRatio) * 0.82;
+        const randRad = (Math.pow(Math.random(), 1.4) - 0.5) * armSpread;
+        const randTan = (Math.random() - 0.5) * armSpread * 0.55;
+        const sinA = Math.sin(angle);
+        const cosA = Math.cos(angle);
+
+        randomnessArray[i3] = -sinA * randRad + cosA * randTan;
+        randomnessArray[i3 + 1] = (Math.random() - 0.5) * (1.1 + rRatio * 2.2);
+        randomnessArray[i3 + 2] = cosA * randRad + sinA * randTan;
 
         const c = armStarPalette[Math.floor(Math.random() * armStarPalette.length)];
         colors[i3] = c.r;
         colors[i3 + 1] = c.g;
         colors[i3 + 2] = c.b;
-      }
 
-      // Kích thước hạt sao nhỏ gọn như hạt bụi kim cương li ti
-      scales[i] = 0.4 + Math.random() * 0.6;
-      twinkleSpeeds[i] = 0.8 + Math.random() * 2.2;
+        scales[i] = 0.4 + Math.random() * 0.6;
+        twinkleSpeeds[i] = 0.8 + Math.random() * 2.2;
+      } else {
+        // 3. Sao rải rác giữa các dải sao: lấp lánh nhẹ nhàng trong lớp mây mờ
+        const rRatio = Math.pow(Math.random(), 1.35);
+        const r = 8.0 + rRatio * (radius - 8.0);
+        const angle = Math.random() * Math.PI * 2;
+
+        positions[i3] = Math.cos(angle) * r;
+        positions[i3 + 1] = 0;
+        positions[i3 + 2] = Math.sin(angle) * r;
+
+        randomnessArray[i3] = (Math.random() - 0.5) * 3.5;
+        randomnessArray[i3 + 1] = (Math.random() - 0.5) * (1.4 + rRatio * 2.4);
+        randomnessArray[i3 + 2] = (Math.random() - 0.5) * 3.5;
+
+        const c = interArmPalette[Math.floor(Math.random() * interArmPalette.length)];
+        colors[i3] = c.r;
+        colors[i3 + 1] = c.g;
+        colors[i3 + 2] = c.b;
+
+        scales[i] = 0.35 + Math.random() * 0.50;
+        twinkleSpeeds[i] = 0.6 + Math.random() * 1.8;
+      }
     }
 
     this.geometry = new THREE.BufferGeometry();
