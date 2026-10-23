@@ -53,14 +53,18 @@ export class LightPillar {
           float flowDown = sin(vUv.y * 18.0 + uTime * 3.8);
           float stream = (flowUp + flowDown) * 0.15 + 0.85;
 
-          // Color gradient: Electric Cyan center blending into Cosmic Violet/Magenta near edges
-          vec3 cyan = vec3(0.0, 0.95, 1.0);
-          vec3 magenta = vec3(0.85, 0.2, 0.95);
-          vec3 color = mix(cyan, magenta, abs(vUv.y - 0.5) * 1.5);
+          // Chuyển màu hài hòa: gốc vàng champagne gần tâm -> xanh cyan -> periwinkle ở 2 cực
+          vec3 gold = vec3(1.0, 0.85, 0.45);
+          vec3 cyan = vec3(0.25, 0.85, 1.0);
+          vec3 periwinkle = vec3(0.7, 0.65, 1.0);
 
-          float alpha = verticalFade * (fresnel * 0.85 + 0.2) * stream * 0.65;
+          float h = abs(vUv.y - 0.5) * 2.0;
+          vec3 color = mix(gold, cyan, smoothstep(0.0, 0.35, h));
+          color = mix(color, periwinkle, smoothstep(0.35, 1.0, h));
 
-          gl_FragColor = vec4(color * 1.4, alpha);
+          float alpha = verticalFade * (fresnel * 0.75 + 0.18) * stream * 0.55;
+
+          gl_FragColor = vec4(color * 1.3, alpha);
         }
       `,
       transparent: true,

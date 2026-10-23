@@ -136,42 +136,48 @@ export class GalaxyGenerator {
       randomnessArray[i3 + 2] = randomZ;
 
       if (r < coreRadius) {
-        // Tâm nhỏ gọn hình đĩa xoáy, phẳng (y mỏng) thay vì hình cầu khổng lồ
+        // Sao vùng thanh chắn trung tâm: mang sắc vàng mật ong và kem champagne ấm áp
         const theta = Math.random() * Math.PI * 2;
         const coreDist = Math.sqrt(Math.random()) * coreRadius;
 
-        positions[i3] = coreDist * Math.cos(theta);
-        positions[i3 + 1] = (Math.random() - 0.5) * 0.9;
-        positions[i3 + 2] = coreDist * Math.sin(theta);
+        // Thanh chắn kéo nhẹ theo chiều nghiêng
+        const barAngle = Math.PI * 0.19;
+        const cosB = Math.cos(barAngle);
+        const sinB = Math.sin(barAngle);
+        const bx = coreDist * Math.cos(theta) * 1.5;
+        const bz = coreDist * Math.sin(theta) * 0.7;
 
-        // Màu tâm: chủ đạo là Xanh Ngọc Luminous Cyan và Tím Magenta, không bị trắng xóa!
-        const norm = coreDist / coreRadius;
-        let c;
-        if (norm < 0.25) {
-          // Chỉ 1 điểm hạt nhân cực nhỏ ở giữa hơi trắng xanh
-          c = colorCore.clone().lerp(colorCoreGlow, norm / 0.25);
-        } else {
-          // Phần còn lại của lõi mang màu cyan và magenta rực rỡ
-          c = colorCoreGlow.clone().lerp(colorAccent, (norm - 0.25) / 0.75);
-        }
+        positions[i3] = bx * cosB - bz * sinB;
+        positions[i3 + 1] = (Math.random() - 0.5) * 1.2;
+        positions[i3 + 2] = bx * sinB + bz * cosB;
+
+        // Màu vàng kem, vàng mật ong ấm áp hài hòa với dải mây thanh chắn
+        const goldColors = [
+          new THREE.Color('#fef08a'),
+          new THREE.Color('#fcd34d'),
+          new THREE.Color('#fbbf24')
+        ];
+        const c = goldColors[Math.floor(Math.random() * goldColors.length)];
         colors[i3] = c.r;
         colors[i3 + 1] = c.g;
         colors[i3 + 2] = c.b;
       } else {
-        // Nhánh xoắn ốc rõ ràng, mạch lạc
+        // Sao dọc các nhánh xoắn ốc: nằm gọn gàng bên trong dải mây xanh lam
         positions[i3] = Math.cos(branchAngle + spinAngle) * r;
         positions[i3 + 1] = 0;
         positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * r;
 
-        const alpha = (r - coreRadius) / (radius - coreRadius);
-        let c = colorInner.clone().lerp(colorOuter, alpha);
-
-        // Điểm xuyết các ngôi sao tím hồng và xanh ngọc
+        // Màu sao xanh lam sáng, kim cương trắng xanh và điểm xuyết đỏ hồng HII
         const rand = Math.random();
-        if (rand > 0.8) {
-          c = colorAccent.clone();
+        let c;
+        if (rand > 0.88) {
+          c = new THREE.Color('#f43f5e'); // Đốm hồng ngọc vườn ươm sao
         } else if (rand > 0.65) {
-          c = colorCoreGlow.clone();
+          c = new THREE.Color('#e0f2fe'); // Sao kim cương trắng xanh
+        } else if (rand > 0.35) {
+          c = new THREE.Color('#93c5fd'); // Xanh lam mềm mại
+        } else {
+          c = new THREE.Color('#60a5fa'); // Xanh thiên thanh
         }
 
         colors[i3] = c.r;

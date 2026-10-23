@@ -26,10 +26,10 @@ export class SagittariusA {
     // 2. Photon Ring (Cyan-White glow ring)
     const ringGeo = new THREE.RingGeometry(1.62, 1.88, 72);
     const ringMat = new THREE.MeshBasicMaterial({
-      color: 0xc8f6ff,
+      color: 0xfff2cc,
       side: THREE.DoubleSide,
       transparent: true,
-      opacity: 0.9
+      opacity: 0.85
     });
     this.photonRing = new THREE.Mesh(ringGeo, ringMat);
     this.photonRing.rotation.x = Math.PI / 2;
@@ -60,20 +60,20 @@ export class SagittariusA {
           // Swirling spiral bands
           float swirl = sin(angle * 4.0 + uTime * 3.5 - dist * 8.0);
 
-          // Cyan / Aqua / Magenta color scheme matching reference image
-          vec3 coreCyan = vec3(0.0, 0.95, 1.0);
-          vec3 midMagenta = vec3(0.85, 0.25, 0.95);
-          vec3 outerBlue = vec3(0.1, 0.35, 1.0);
+          // Sắc vàng mật ong, hổ phách và champagne ấm áp hài hòa với thanh chắn ngân hà
+          vec3 coreWhiteGold = vec3(1.0, 0.95, 0.75);
+          vec3 midGold = vec3(1.0, 0.75, 0.2);
+          vec3 outerAmber = vec3(0.9, 0.45, 0.1);
 
           float innerAlpha = smoothstep(0.22, 0.32, dist);
           float outerAlpha = 1.0 - smoothstep(0.7, 1.0, dist);
           float fade = innerAlpha * outerAlpha;
 
-          vec3 plasmaColor = mix(coreCyan, midMagenta, smoothstep(0.22, 0.6, dist));
-          plasmaColor = mix(plasmaColor, outerBlue, smoothstep(0.6, 1.0, dist));
+          vec3 plasmaColor = mix(coreWhiteGold, midGold, smoothstep(0.22, 0.55, dist));
+          plasmaColor = mix(plasmaColor, outerAmber, smoothstep(0.55, 1.0, dist));
 
           float brightness = 0.8 + swirl * 0.25;
-          gl_FragColor = vec4(plasmaColor * brightness, fade * 0.7);
+          gl_FragColor = vec4(plasmaColor * brightness, fade * 0.65);
         }
       `,
       transparent: true,
