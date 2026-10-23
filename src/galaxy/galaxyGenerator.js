@@ -2,13 +2,13 @@ import * as THREE from 'three';
 
 export const COLOR_THEMES = {
   cosmic: {
-    name: 'NASA Milky Way (Tối & Dịu mắt)',
-    core: '#e8d5a3',
-    coreGlow: '#d4af37',
-    innerArm: '#5a82c4',
-    outerArm: '#2c4a87',
-    accentArm: '#b83258',
-    dust: '#02040d'
+    name: 'Cosmoscope & NASA (Vàng hổ phách & Mây trầm)',
+    core: '#e2ba6f',
+    coreGlow: '#c68d37',
+    innerArm: '#4d6d9e',
+    outerArm: '#273859',
+    accentArm: '#8a334a',
+    dust: '#02040a'
   },
   andromeda: {
     name: 'Andromeda Cyan (Biển trời Ngân hà)',
@@ -55,10 +55,10 @@ export class GalaxyGenerator {
     this.geometry = null;
     this.material = null;
 
-    // Chế độ tối, thanh thoát, sao nhỏ li ti dịu nhẹ như ảnh thiên văn NASA
+    // Chế độ tối, thanh thoát, sao nhỏ li ti dịu nhẹ như Cosmoscope
     this.parameters = {
       count: 36000,      // Số lượng sao vừa đủ, không bị dày đặc
-      size: 0.009,       // Kích thước sao siêu nhỏ li ti
+      size: 0.008,       // Kích thước sao siêu nhỏ li ti
       radius: 120,
       branches: 4,
       spin: 1.65,
@@ -101,18 +101,20 @@ export class GalaxyGenerator {
     const randomnessArray = new Float32Array(count * 3);
     const twinkleSpeeds = new Float32Array(count);
 
-    // Bảng màu sao trầm, dịu, không gắt
+    // Bảng màu sao trầm, dịu, ấm vàng tự nhiên như ảnh Cosmoscope & Hubble
     const goldBarStars = [
-      new THREE.Color('#d4b476'), // Vàng cát trầm
-      new THREE.Color('#c99d52'), // Hổ phách dịu
-      new THREE.Color('#e0caa0')  // Kem champagne trầm
+      new THREE.Color('#d4a853'), // Vàng hổ phách sáng nhẹ
+      new THREE.Color('#be8d3d'), // Hổ phách ấm
+      new THREE.Color('#e2c88f'), // Champagne ấm
+      new THREE.Color('#f0dcad')  // Kem ngà
     ];
 
     const armStarPalette = [
-      new THREE.Color('#789ac7'), // Xanh lam dịu
-      new THREE.Color('#5878ab'), // Xanh denim trầm
-      new THREE.Color('#9bb6dc'), // Bạc xanh
-      new THREE.Color('#c2546e')  // Đốm hồng ngọc nhỏ
+      new THREE.Color('#6c8db9'), // Lam trầm
+      new THREE.Color('#506d91'), // Denim trầm
+      new THREE.Color('#94a8c9'), // Bạc ánh xanh
+      new THREE.Color('#b88b4a'), // Sao lùn vàng ngoại vi
+      new THREE.Color('#a84b5c')  // Hồng ngọc mờ (vùng tạo sao H II)
     ];
 
     for (let i = 0; i < count; i++) {
@@ -211,9 +213,9 @@ export class GalaxyGenerator {
           float twinkle = sin(uTime * aTwinkleSpeed + finalPos.x * 0.35 + finalPos.z * 0.35) * 0.18 + 0.82;
           vTwinkle = twinkle;
 
-          // Hạt sao siêu nhỏ thanh mảnh, dịu mắt chuẩn 100,000 Stars
-          gl_PointSize = uSize * aScale * twinkle * (140.0 / -viewPosition.z);
-          gl_PointSize = clamp(gl_PointSize, 1.0, 4.5);
+          // Hạt sao siêu nhỏ thanh mảnh, dịu mắt chuẩn Cosmoscope
+          gl_PointSize = uSize * aScale * twinkle * (130.0 / -viewPosition.z);
+          gl_PointSize = clamp(gl_PointSize, 0.8, 3.6);
         }
       `,
       fragmentShader: `
@@ -224,13 +226,13 @@ export class GalaxyGenerator {
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
 
-          // Đốm sao li ti dịu nhẹ
+          // Đốm sao li ti dịu nhẹ ẩn hiện trong mây
           float intensity = (1.0 - smoothstep(0.0, 0.5, dist));
-          intensity = pow(intensity, 2.0);
+          intensity = pow(intensity, 2.2);
 
-          vec3 finalColor = vColor * intensity * vTwinkle * 0.32;
+          vec3 finalColor = vColor * intensity * vTwinkle * 0.26;
 
-          gl_FragColor = vec4(finalColor, intensity * 0.4);
+          gl_FragColor = vec4(finalColor, intensity * 0.35);
         }
       `,
       depthWrite: false,
@@ -239,7 +241,7 @@ export class GalaxyGenerator {
       transparent: true,
       uniforms: {
         uTime: { value: 0 },
-        uSize: { value: 3.6 * window.devicePixelRatio },
+        uSize: { value: 3.2 * window.devicePixelRatio },
         uSpeed: { value: this.parameters.speed }
       }
     });
