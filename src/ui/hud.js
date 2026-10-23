@@ -4,6 +4,7 @@ export function setupHUD({
   galaxy,
   dust,
   blackHole,
+  lightPillar,
   landmarks,
   controls,
   composer,
@@ -33,6 +34,7 @@ export function setupHUD({
   const checkDust = document.getElementById('check-dust');
   const checkLabels = document.getElementById('check-labels');
   const checkJets = document.getElementById('check-jets');
+  const checkPillar = document.getElementById('check-pillar');
 
   // Preset buttons
   const presetButtons = document.querySelectorAll('[data-preset]');
@@ -147,6 +149,12 @@ export function setupHUD({
   checkJets.addEventListener('change', (e) => {
     blackHole.toggleJets(e.target.checked);
   });
+
+  if (checkPillar && lightPillar) {
+    checkPillar.addEventListener('change', (e) => {
+      lightPillar.toggle(e.target.checked);
+    });
+  }
 
   // Screenshot Capture Button
   screenshotBtn.addEventListener('click', () => {

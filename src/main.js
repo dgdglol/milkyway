@@ -5,6 +5,7 @@ import { createControls } from './core/controls.js';
 import { GalaxyGenerator } from './galaxy/galaxyGenerator.js';
 import { DustGenerator } from './galaxy/dustGenerator.js';
 import { SagittariusA } from './galaxy/blackHole.js';
+import { LightPillar } from './galaxy/lightPillar.js';
 import { LandmarksManager } from './galaxy/landmarks.js';
 import { setupHUD } from './ui/hud.js';
 
@@ -22,16 +23,19 @@ window.addEventListener('DOMContentLoaded', () => {
   // 3. OrbitControls & Camera FlyTo
   const controls = createControls(camera, renderer.domElement);
 
-  // 4. Spiral Galaxy Stars Generator
+  // 4. Spiral Galaxy Stars Generator (Chế độ ít sao thanh thoát)
   const galaxy = new GalaxyGenerator(scene);
 
   // 5. Interstellar Dust & Emission Nebulae
   const dust = new DustGenerator(scene);
 
-  // 6. Central Supermassive Black Hole (Sagittarius A*)
+  // 6. Central Black Hole
   const blackHole = new SagittariusA(scene);
 
-  // 7. 3D Celestial Landmarks & Solar System Beacon
+  // 7. Cột ánh sáng vũ trụ xuyên qua tâm Dải Ngân Hà
+  const lightPillar = new LightPillar(scene);
+
+  // 8. 3D Celestial Landmarks & Solar System Beacon
   const landmarks = new LandmarksManager(scene, camera, landmarksContainer, (item) => {
     if (item.cameraPreset) {
       controls.goToPreset(item.cameraPreset);
@@ -40,11 +44,12 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 8. Connect HUD & UI Event Listeners
+  // 9. Connect HUD & UI Event Listeners
   setupHUD({
     galaxy,
     dust,
     blackHole,
+    lightPillar,
     landmarks,
     controls,
     composer,
@@ -53,7 +58,7 @@ window.addEventListener('DOMContentLoaded', () => {
     camera
   });
 
-  // 9. Resize Handling
+  // 10. Resize Handling
   window.addEventListener('resize', () => {
     const width = window.innerWidth;
     const height = window.innerHeight;
@@ -67,12 +72,12 @@ window.addEventListener('DOMContentLoaded', () => {
     composer.resize(width, height);
   });
 
-  // 10. FPS Counter & Telemetry
+  // 11. FPS Counter & Telemetry
   let frameCount = 0;
   let lastTime = performance.now();
   const fpsElement = document.getElementById('stat-fps');
 
-  // 11. Main Animation Loop
+  // 12. Main Animation Loop
   const clock = new THREE.Clock();
 
   function animate() {
@@ -80,12 +85,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const elapsedTime = clock.getElapsedTime();
 
-    // Rotate distant background stars extremely slowly for cosmic realism
+    // Rotate distant background stars slowly
     if (bgStars) {
       bgStars.rotation.y = elapsedTime * 0.002;
     }
 
-    // Update galaxy shader uniforms (twinkling and differential rotation)
+    // Update galaxy shader uniforms
     galaxy.update(elapsedTime);
 
     // Update interstellar dust clouds
@@ -94,7 +99,10 @@ window.addEventListener('DOMContentLoaded', () => {
     // Update black hole accretion disk & relativistic jets
     blackHole.update(elapsedTime);
 
-    // Update landmarks (beacon pulse and 3D projection to screen)
+    // Update cosmic light pillar
+    lightPillar.update(elapsedTime);
+
+    // Update landmarks
     landmarks.update(elapsedTime);
 
     // Update smooth damping controls

@@ -1,25 +1,23 @@
 import * as THREE from 'three';
 
-// Color themes with default tuned exactly to the reference image:
-// Deep Electric Blue, Neon Cyan, Turquoise, and Magenta/Violet swirls with rich contrast
 export const COLOR_THEMES = {
   cosmic: {
-    name: 'Electric Blue & Cyan (Giống ảnh mẫu)',
-    core: '#ffffff',
+    name: 'Electric Blue & Cyan (Chuẩn ảnh mẫu)',
+    core: '#e0faff',
     coreGlow: '#00f5ff',
-    innerArm: '#0088ff',
-    outerArm: '#1044ff',
+    innerArm: '#0077ff',
+    outerArm: '#1033ee',
     accentArm: '#d946ef',
-    dust: '#0f172a'
+    dust: '#050a1f'
   },
   neon: {
     name: 'Cyberpunk Neon (Hồng & Lam tương phản)',
     core: '#ffffff',
     coreGlow: '#ff007f',
     innerArm: '#00f0ff',
-    outerArm: '#7000ff',
-    accentArm: '#ff00aa',
-    dust: '#180033'
+    outerArm: '#6000e0',
+    accentArm: '#ff00b7',
+    dust: '#120024'
   },
   andromeda: {
     name: 'Andromeda Cyan (Biển trời Ngân hà)',
@@ -57,20 +55,20 @@ export class GalaxyGenerator {
     this.geometry = null;
     this.material = null;
 
-    // Bokeh orbs mesh
     this.bokehMesh = null;
     this.bokehGeo = null;
     this.bokehMat = null;
 
+    // Chế độ thanh thoát mặc định (ít sao, gọn gàng, tâm không bị to hay trắng xóa)
     this.parameters = {
-      count: 120000,
-      size: 0.014,
-      radius: 125,
+      count: 45000,
+      size: 0.013,
+      radius: 120,
       branches: 4,
-      spin: 1.6,
-      randomness: 0.32,
-      power: 3.2,
-      coreRadius: 14,
+      spin: 1.65,
+      randomness: 0.28,
+      power: 1.9,       // Tỉ lệ đều khắp đĩa xoắn ốc, không bị dồn cục ở giữa
+      coreRadius: 6.0,   // Tâm nhỏ gọn, tinh tế
       currentTheme: 'cosmic',
       speed: 0.28
     };
@@ -119,65 +117,61 @@ export class GalaxyGenerator {
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
 
-      // Distance from center
+      // Phân bố đều dọc theo toàn bộ các nhánh xoắn ốc
       const rRatio = Math.pow(Math.random(), power);
       const r = rRatio * radius;
 
-      // Logarithmic spiral arms
       const branchAngle = ((i % branches) / branches) * Math.PI * 2;
       const spinAngle = r * spin * 0.055;
 
-      // Flatter, cleaner disk so arms stand out crisp and clear without milky fog
-      const heightDispersion = Math.max(0.08, (1.0 - rRatio * 0.82)) * randomness * 4.5;
+      // Đĩa ngân hà phẳng và mỏng gọn, không bị phình to
+      const heightDispersion = Math.max(0.06, (1.0 - rRatio * 0.8)) * randomness * 3.8;
 
-      const randomX = Math.pow(Math.random(), 2.2) * (Math.random() < 0.5 ? 1 : -1) * randomness * r * 0.35;
+      const randomX = Math.pow(Math.random(), 2.2) * (Math.random() < 0.5 ? 1 : -1) * randomness * r * 0.32;
       const randomY = (Math.random() - 0.5) * heightDispersion;
-      const randomZ = Math.pow(Math.random(), 2.2) * (Math.random() < 0.5 ? 1 : -1) * randomness * r * 0.35;
+      const randomZ = Math.pow(Math.random(), 2.2) * (Math.random() < 0.5 ? 1 : -1) * randomness * r * 0.32;
 
       randomnessArray[i3] = randomX;
       randomnessArray[i3 + 1] = randomY;
       randomnessArray[i3 + 2] = randomZ;
 
       if (r < coreRadius) {
-        // Tight, compact core
-        const u = Math.random();
-        const v = Math.random();
-        const theta = u * 2.0 * Math.PI;
-        const phi = Math.acos(2.0 * v - 1.0);
-        const coreDist = Math.cbrt(Math.random()) * coreRadius;
+        // Tâm nhỏ gọn hình đĩa xoáy, phẳng (y mỏng) thay vì hình cầu khổng lồ
+        const theta = Math.random() * Math.PI * 2;
+        const coreDist = Math.sqrt(Math.random()) * coreRadius;
 
-        positions[i3] = coreDist * Math.sin(phi) * Math.cos(theta);
-        positions[i3 + 1] = coreDist * Math.sin(phi) * Math.sin(theta) * 0.35;
-        positions[i3 + 2] = coreDist * Math.cos(phi);
+        positions[i3] = coreDist * Math.cos(theta);
+        positions[i3 + 1] = (Math.random() - 0.5) * 0.9;
+        positions[i3 + 2] = coreDist * Math.sin(theta);
 
-        // Core colors: tiny bright white center quickly transitioning into brilliant cyan and magenta halo
-        const normDist = coreDist / coreRadius;
+        // Màu tâm: chủ đạo là Xanh Ngọc Luminous Cyan và Tím Magenta, không bị trắng xóa!
+        const norm = coreDist / coreRadius;
         let c;
-        if (normDist < 0.25) {
-          c = colorCore.clone().lerp(colorCoreGlow, normDist / 0.25);
+        if (norm < 0.25) {
+          // Chỉ 1 điểm hạt nhân cực nhỏ ở giữa hơi trắng xanh
+          c = colorCore.clone().lerp(colorCoreGlow, norm / 0.25);
         } else {
-          c = colorCoreGlow.clone().lerp(colorAccent, (normDist - 0.25) / 0.75);
+          // Phần còn lại của lõi mang màu cyan và magenta rực rỡ
+          c = colorCoreGlow.clone().lerp(colorAccent, (norm - 0.25) / 0.75);
         }
         colors[i3] = c.r;
         colors[i3 + 1] = c.g;
         colors[i3 + 2] = c.b;
       } else {
-        // Spiral arms
+        // Nhánh xoắn ốc rõ ràng, mạch lạc
         positions[i3] = Math.cos(branchAngle + spinAngle) * r;
         positions[i3 + 1] = 0;
         positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * r;
 
-        // Rich, high-contrast arm gradient matching reference image:
-        // Cyan-blue -> Royal Blue -> Deep Electric Blue with frequent Magenta/Violet accents
         const alpha = (r - coreRadius) / (radius - coreRadius);
         let c = colorInner.clone().lerp(colorOuter, alpha);
 
-        // 25% of stars along the spiral arms are vibrant magenta / violet / turquoise highlights
+        // Điểm xuyết các ngôi sao tím hồng và xanh ngọc
         const rand = Math.random();
-        if (rand > 0.82) {
+        if (rand > 0.8) {
           c = colorAccent.clone();
-        } else if (rand > 0.68) {
-          c = colorCoreGlow.clone(); // Cyan highlight
+        } else if (rand > 0.65) {
+          c = colorCoreGlow.clone();
         }
 
         colors[i3] = c.r;
@@ -185,9 +179,9 @@ export class GalaxyGenerator {
         colors[i3 + 2] = c.b;
       }
 
-      // Star sizes: fine, controlled, not overly large
-      scales[i] = 0.65 + Math.random() * 1.1;
-      twinkleSpeeds[i] = 1.2 + Math.random() * 3.5;
+      // Kích thước hạt sao nhỏ gọn, sắc sảo
+      scales[i] = 0.55 + Math.random() * 0.95;
+      twinkleSpeeds[i] = 1.0 + Math.random() * 3.0;
     }
 
     this.geometry = new THREE.BufferGeometry();
@@ -197,7 +191,6 @@ export class GalaxyGenerator {
     this.geometry.setAttribute('aRandomness', new THREE.BufferAttribute(randomnessArray, 3));
     this.geometry.setAttribute('aTwinkleSpeed', new THREE.BufferAttribute(twinkleSpeeds, 1));
 
-    // Custom GLSL Shader that preserves saturated colors without blowing out to white
     this.material = new THREE.ShaderMaterial({
       vertexShader: `
         uniform float uTime;
@@ -215,7 +208,6 @@ export class GalaxyGenerator {
           vColor = color;
 
           float dist = length(position.xz);
-          // Rotation speed curve
           float orbitSpeed = uTime * uSpeed * 0.12 * (1.0 / (1.0 + dist * 0.012));
 
           float cosA = cos(orbitSpeed);
@@ -230,30 +222,26 @@ export class GalaxyGenerator {
           vec4 viewPosition = viewMatrix * modelPosition;
           gl_Position = projectionMatrix * viewPosition;
 
-          // Twinkle pulse
-          float twinkle = sin(uTime * aTwinkleSpeed + finalPos.x * 0.4 + finalPos.z * 0.4) * 0.22 + 0.78;
+          float twinkle = sin(uTime * aTwinkleSpeed + finalPos.x * 0.35 + finalPos.z * 0.35) * 0.2 + 0.8;
           vTwinkle = twinkle;
 
-          // Controlled point size to keep galaxy structure sharp and clean
-          gl_PointSize = uSize * aScale * twinkle * (210.0 / -viewPosition.z);
-          gl_PointSize = clamp(gl_PointSize, 1.0, 16.0);
+          gl_PointSize = uSize * aScale * twinkle * (200.0 / -viewPosition.z);
+          gl_PointSize = clamp(gl_PointSize, 1.0, 14.0);
         }
       `,
       fragmentShader: `
         varying vec3 vColor;
-        varying float vAlpha;
         varying float vTwinkle;
 
         void main() {
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
 
-          // Crisp, soft star with glowing core
-          float intensity = exp(-dist * 10.0) * 1.3;
-          float halo = (1.0 - smoothstep(0.0, 0.5, dist)) * 0.5;
+          float intensity = exp(-dist * 11.0) * 1.3;
+          float halo = (1.0 - smoothstep(0.0, 0.5, dist)) * 0.45;
           float strength = intensity + halo;
 
-          // Keep colors deeply saturated, do NOT force white!
+          // Màu sắc giữ nguyên độ bão hòa rực rỡ, không bị chói trắng
           vec3 finalColor = vColor * strength * vTwinkle;
 
           gl_FragColor = vec4(finalColor, strength);
@@ -265,7 +253,7 @@ export class GalaxyGenerator {
       transparent: true,
       uniforms: {
         uTime: { value: 0 },
-        uSize: { value: 16.0 * window.devicePixelRatio },
+        uSize: { value: 14.0 * window.devicePixelRatio },
         uSpeed: { value: this.parameters.speed }
       }
     });
@@ -274,7 +262,7 @@ export class GalaxyGenerator {
     this.scene.add(this.points);
   }
 
-  // Floating Dreamy Bokeh Orbs (exactly matching the large soft circles in the reference photo)
+  // 800 Hạt Bokeh quang học mộng mơ
   generateBokehOrbs() {
     if (this.bokehMesh !== null) {
       this.bokehGeo.dispose();
@@ -282,30 +270,27 @@ export class GalaxyGenerator {
       this.scene.remove(this.bokehMesh);
     }
 
-    const bokehCount = 1200;
+    const bokehCount = 800;
     const positions = new Float32Array(bokehCount * 3);
     const colors = new Float32Array(bokehCount * 3);
     const scales = new Float32Array(bokehCount);
     const phases = new Float32Array(bokehCount);
 
     const bokehPalettes = [
-      new THREE.Color('#38bdf8'), // Cyan
-      new THREE.Color('#00f5ff'), // Neon Aqua
-      new THREE.Color('#3b82f6'), // Electric Blue
-      new THREE.Color('#818cf8'), // Soft Lavender
-      new THREE.Color('#c084fc'), // Orchid Pink
-      new THREE.Color('#34d399')  // Turquoise / Mint
+      new THREE.Color('#00f5ff'),
+      new THREE.Color('#38bdf8'),
+      new THREE.Color('#3b82f6'),
+      new THREE.Color('#818cf8'),
+      new THREE.Color('#c084fc'),
+      new THREE.Color('#34d399')
     ];
 
     for (let i = 0; i < bokehCount; i++) {
       const i3 = i * 3;
 
-      // Distribute along the spiral disk
-      const r = 8 + Math.pow(Math.random(), 1.8) * 115;
+      const r = 10 + Math.pow(Math.random(), 1.7) * 110;
       const angle = Math.random() * Math.PI * 2;
-
-      // Float gently above and below the galactic plane
-      const h = (Math.random() - 0.5) * 22.0;
+      const h = (Math.random() - 0.5) * 18.0;
 
       positions[i3] = Math.cos(angle) * r;
       positions[i3 + 1] = h;
@@ -316,8 +301,7 @@ export class GalaxyGenerator {
       colors[i3 + 1] = c.g;
       colors[i3 + 2] = c.b;
 
-      // Large bokeh orb scale
-      scales[i] = 16.0 + Math.random() * 32.0;
+      scales[i] = 14.0 + Math.random() * 26.0;
       phases[i] = Math.random() * Math.PI * 2;
     }
 
@@ -327,7 +311,6 @@ export class GalaxyGenerator {
     this.bokehGeo.setAttribute('aScale', new THREE.BufferAttribute(scales, 1));
     this.bokehGeo.setAttribute('aPhase', new THREE.BufferAttribute(phases, 1));
 
-    // Custom Bokeh Shader: creates translucent optical circle with soft rim
     this.bokehMat = new THREE.ShaderMaterial({
       vertexShader: `
         uniform float uTime;
@@ -340,12 +323,9 @@ export class GalaxyGenerator {
           vColor = color;
 
           vec3 p = position;
-          // Slow floating drift in Y axis
-          p.y += sin(uTime * 0.8 + aPhase) * 1.5;
+          p.y += sin(uTime * 0.7 + aPhase) * 1.2;
 
-          // Slow rotation around galaxy center
-          float dist = length(p.xz);
-          float angle = uTime * 0.035;
+          float angle = uTime * 0.03;
           float cosA = cos(angle);
           float sinA = sin(angle);
           float nx = p.x * cosA - p.z * sinA;
@@ -356,11 +336,10 @@ export class GalaxyGenerator {
           vec4 mvPos = modelViewMatrix * vec4(p, 1.0);
           gl_Position = projectionMatrix * mvPos;
 
-          // Soft breathing opacity
-          vAlpha = 0.35 + sin(uTime * 1.2 + aPhase) * 0.12;
+          vAlpha = 0.32 + sin(uTime * 1.1 + aPhase) * 0.1;
 
-          gl_PointSize = aScale * (120.0 / -mvPos.z);
-          gl_PointSize = clamp(gl_PointSize, 2.0, 48.0);
+          gl_PointSize = aScale * (110.0 / -mvPos.z);
+          gl_PointSize = clamp(gl_PointSize, 2.0, 42.0);
         }
       `,
       fragmentShader: `
@@ -371,10 +350,9 @@ export class GalaxyGenerator {
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
 
-          // Camera lens bokeh appearance: soft edge with luminous circular rim
           float edge = smoothstep(0.5, 0.42, dist);
-          float rim = smoothstep(0.25, 0.46, dist) * 0.6;
-          float body = (1.0 - smoothstep(0.0, 0.45, dist)) * 0.4;
+          float rim = smoothstep(0.25, 0.46, dist) * 0.55;
+          float body = (1.0 - smoothstep(0.0, 0.45, dist)) * 0.35;
           float bokeh = (edge * 0.35 + rim + body);
 
           gl_FragColor = vec4(vColor, bokeh * vAlpha);
