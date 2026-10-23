@@ -9,14 +9,14 @@ export class DustGenerator {
     this.material = null;
 
     this.parameters = {
-      count: 35000,
+      count: 20000,
       radius: 110,
       branches: 4,
-      spin: 1.5,
-      randomness: 0.65,
+      spin: 1.6,
+      randomness: 0.45,
       power: 2.8,
       currentTheme: 'cosmic',
-      speed: 0.35,
+      speed: 0.28,
       visible: true
     };
 
@@ -38,10 +38,15 @@ export class DustGenerator {
 
     if (!this.parameters.visible) return;
 
-    const { count, radius, branches, spin, randomness, power, currentTheme } = this.parameters;
-    const theme = COLOR_THEMES[currentTheme] || COLOR_THEMES.cosmic;
-    const dustBaseColor = new THREE.Color(theme.dust);
-    const secondaryColor = new THREE.Color(theme.innerArm);
+    const { count, radius, branches, spin, randomness, power } = this.parameters;
+
+    // Deep, dark interstellar nebula dust: adds rich color depth without milky white washing
+    const dustColors = [
+      new THREE.Color('#0033aa'), // Deep royal blue
+      new THREE.Color('#002266'), // Midnight blue
+      new THREE.Color('#380066'), // Deep violet
+      new THREE.Color('#005577')  // Dark cyan
+    ];
 
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
@@ -51,34 +56,28 @@ export class DustGenerator {
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
 
-      // Dust concentrates primarily in the mid-disk and spiral arms
       const rRatio = Math.pow(Math.random(), power);
-      const r = 8 + rRatio * radius;
+      const r = 12 + rRatio * radius;
 
       const branchAngle = ((i % branches) / branches) * Math.PI * 2;
-      const spinAngle = r * spin * 0.05;
-
-      // Slight offset from the main star lane to create the real "interstellar dust lanes"
-      const laneOffset = 0.25;
+      const spinAngle = r * spin * 0.055;
+      const laneOffset = 0.22;
 
       positions[i3] = Math.cos(branchAngle + spinAngle + laneOffset) * r;
       positions[i3 + 1] = 0;
       positions[i3 + 2] = Math.sin(branchAngle + spinAngle + laneOffset) * r;
 
-      // Vertical fluffiness
-      const height = (1.0 - rRatio * 0.5) * randomness * 12.0;
-      randomnessArray[i3] = (Math.random() - 0.5) * randomness * r * 0.45;
+      const height = (1.0 - rRatio * 0.6) * randomness * 6.0;
+      randomnessArray[i3] = (Math.random() - 0.5) * randomness * r * 0.35;
       randomnessArray[i3 + 1] = (Math.random() - 0.5) * height;
-      randomnessArray[i3 + 2] = (Math.random() - 0.5) * randomness * r * 0.45;
+      randomnessArray[i3 + 2] = (Math.random() - 0.5) * randomness * r * 0.35;
 
-      // Subtle color gradient
-      const mixedColor = dustBaseColor.clone().lerp(secondaryColor, Math.random() * 0.7);
-      colors[i3] = mixedColor.r;
-      colors[i3 + 1] = mixedColor.g;
-      colors[i3 + 2] = mixedColor.b;
+      const c = dustColors[Math.floor(Math.random() * dustColors.length)];
+      colors[i3] = c.r;
+      colors[i3 + 1] = c.g;
+      colors[i3 + 2] = c.b;
 
-      // Much larger particle sizes for cloudy volumetric look
-      scales[i] = 18.0 + Math.random() * 24.0;
+      scales[i] = 12.0 + Math.random() * 16.0;
     }
 
     this.geometry = new THREE.BufferGeometry();
@@ -87,7 +86,6 @@ export class DustGenerator {
     this.geometry.setAttribute('aScale', new THREE.BufferAttribute(scales, 1));
     this.geometry.setAttribute('aRandomness', new THREE.BufferAttribute(randomnessArray, 3));
 
-    // Custom Cloud/Gas Shader
     this.material = new THREE.ShaderMaterial({
       vertexShader: `
         uniform float uTime;
@@ -103,7 +101,7 @@ export class DustGenerator {
           vColor = color;
 
           float dist = length(position.xz);
-          float orbitSpeed = uTime * uSpeed * 0.15 * (1.0 / (1.0 + dist * 0.015));
+          float orbitSpeed = uTime * uSpeed * 0.12 * (1.0 / (1.0 + dist * 0.012));
 
           float cosA = cos(orbitSpeed);
           float sinA = sin(orbitSpeed);
@@ -117,12 +115,11 @@ export class DustGenerator {
           vec4 viewPosition = viewMatrix * modelPosition;
           gl_Position = projectionMatrix * viewPosition;
 
-          // Gas cloud pulsation
-          float pulse = sin(uTime * 0.5 + dist * 0.1) * 0.15 + 0.85;
-          vAlpha = 0.22 * pulse;
+          // Low subtle opacity to prevent white washing
+          vAlpha = 0.09 + sin(uTime * 0.4 + dist * 0.1) * 0.02;
 
-          gl_PointSize = aScale * (140.0 / -viewPosition.z);
-          gl_PointSize = max(gl_PointSize, 1.0);
+          gl_PointSize = aScale * (120.0 / -viewPosition.z);
+          gl_PointSize = clamp(gl_PointSize, 1.0, 32.0);
         }
       `,
       fragmentShader: `
@@ -133,9 +130,8 @@ export class DustGenerator {
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
 
-          // Soft volumetric gaussian falloff
           float strength = 1.0 - smoothstep(0.0, 0.5, dist);
-          strength = pow(strength, 2.2);
+          strength = pow(strength, 2.5);
 
           gl_FragColor = vec4(vColor, strength * vAlpha);
         }

@@ -1,41 +1,52 @@
 import * as THREE from 'three';
 
-// Color themes for the galaxy
+// Color themes with default tuned exactly to the reference image:
+// Deep Electric Blue, Neon Cyan, Turquoise, and Magenta/Violet swirls with rich contrast
 export const COLOR_THEMES = {
   cosmic: {
-    name: 'Cosmic Violet & Cyan (Vũ trụ Huyền ảo)',
-    core: '#fff2d6',
-    innerArm: '#d946ef',
-    outerArm: '#38bdf8',
-    dust: '#9333ea'
+    name: 'Electric Blue & Cyan (Giống ảnh mẫu)',
+    core: '#ffffff',
+    coreGlow: '#00f5ff',
+    innerArm: '#0088ff',
+    outerArm: '#1044ff',
+    accentArm: '#d946ef',
+    dust: '#0f172a'
+  },
+  neon: {
+    name: 'Cyberpunk Neon (Hồng & Lam tương phản)',
+    core: '#ffffff',
+    coreGlow: '#ff007f',
+    innerArm: '#00f0ff',
+    outerArm: '#7000ff',
+    accentArm: '#ff00aa',
+    dust: '#180033'
   },
   andromeda: {
     name: 'Andromeda Cyan (Biển trời Ngân hà)',
     core: '#e0f2fe',
-    innerArm: '#38bdf8',
-    outerArm: '#6366f1',
-    dust: '#0284c7'
+    coreGlow: '#38bdf8',
+    innerArm: '#0284c7',
+    outerArm: '#1e3a8a',
+    accentArm: '#818cf8',
+    dust: '#030712'
   },
   golden: {
     name: 'Solar Gold (Vàng hoàng gia & Lửa sao)',
-    core: '#fef08a',
-    innerArm: '#f97316',
-    outerArm: '#ea580c',
-    dust: '#b45309'
-  },
-  neon: {
-    name: 'Cyberpunk Neon (Hồng - Lam tương phản)',
     core: '#ffffff',
-    innerArm: '#ff007f',
-    outerArm: '#00f0ff',
-    dust: '#7000ff'
+    coreGlow: '#fef08a',
+    innerArm: '#f59e0b',
+    outerArm: '#b45309',
+    accentArm: '#ea580c',
+    dust: '#1c1917'
   },
   realistic: {
     name: 'Astrophysical (Thực tế Thiên văn)',
     core: '#ffeedd',
-    innerArm: '#a5c9eb',
-    outerArm: '#7faadc',
-    dust: '#3a2050'
+    coreGlow: '#dbeafe',
+    innerArm: '#60a5fa',
+    outerArm: '#1e40af',
+    accentArm: '#93c5fd',
+    dust: '#020617'
   }
 };
 
@@ -46,18 +57,22 @@ export class GalaxyGenerator {
     this.geometry = null;
     this.material = null;
 
-    // Default parameters
+    // Bokeh orbs mesh
+    this.bokehMesh = null;
+    this.bokehGeo = null;
+    this.bokehMat = null;
+
     this.parameters = {
-      count: 200000,
-      size: 0.018,
-      radius: 120,
+      count: 120000,
+      size: 0.014,
+      radius: 125,
       branches: 4,
-      spin: 1.5,
-      randomness: 0.45,
-      power: 3.5,
-      coreRadius: 18,
+      spin: 1.6,
+      randomness: 0.32,
+      power: 3.2,
+      coreRadius: 14,
       currentTheme: 'cosmic',
-      speed: 0.35
+      speed: 0.28
     };
 
     this.init();
@@ -65,12 +80,12 @@ export class GalaxyGenerator {
 
   init() {
     this.generate();
+    this.generateBokehOrbs();
   }
 
   generate(customParams = {}) {
     Object.assign(this.parameters, customParams);
 
-    // Clean up previous mesh
     if (this.points !== null) {
       this.geometry.dispose();
       this.material.dispose();
@@ -90,43 +105,41 @@ export class GalaxyGenerator {
 
     const theme = COLOR_THEMES[currentTheme] || COLOR_THEMES.cosmic;
     const colorCore = new THREE.Color(theme.core);
+    const colorCoreGlow = new THREE.Color(theme.coreGlow);
     const colorInner = new THREE.Color(theme.innerArm);
     const colorOuter = new THREE.Color(theme.outerArm);
+    const colorAccent = new THREE.Color(theme.accentArm);
 
-    // Buffer attributes
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const scales = new Float32Array(count);
     const randomnessArray = new Float32Array(count * 3);
-    const distanceRatios = new Float32Array(count);
     const twinkleSpeeds = new Float32Array(count);
 
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
 
-      // Distance from center (power curve creates dense core with long sparse arms)
+      // Distance from center
       const rRatio = Math.pow(Math.random(), power);
       const r = rRatio * radius;
-      distanceRatios[i] = rRatio;
 
-      // Branch angle for logarithmic spiral arms
+      // Logarithmic spiral arms
       const branchAngle = ((i % branches) / branches) * Math.PI * 2;
-      const spinAngle = r * spin * 0.05;
+      const spinAngle = r * spin * 0.055;
 
-      // Random dispersion (thicker near center, flattens towards edges)
-      // Disk height: thin disk model
-      const heightDispersion = Math.max(0.1, (1.0 - rRatio * 0.75)) * randomness * 8.0;
+      // Flatter, cleaner disk so arms stand out crisp and clear without milky fog
+      const heightDispersion = Math.max(0.08, (1.0 - rRatio * 0.82)) * randomness * 4.5;
 
-      const randomX = Math.pow(Math.random(), 2.0) * (Math.random() < 0.5 ? 1 : -1) * randomness * r * 0.45;
-      const randomY = (Math.random() - 0.5) * heightDispersion * (Math.random() * 2.0);
-      const randomZ = Math.pow(Math.random(), 2.0) * (Math.random() < 0.5 ? 1 : -1) * randomness * r * 0.45;
+      const randomX = Math.pow(Math.random(), 2.2) * (Math.random() < 0.5 ? 1 : -1) * randomness * r * 0.35;
+      const randomY = (Math.random() - 0.5) * heightDispersion;
+      const randomZ = Math.pow(Math.random(), 2.2) * (Math.random() < 0.5 ? 1 : -1) * randomness * r * 0.35;
 
       randomnessArray[i3] = randomX;
       randomnessArray[i3 + 1] = randomY;
       randomnessArray[i3 + 2] = randomZ;
 
-      // Central Bulge has spherical/ellipsoid distribution
       if (r < coreRadius) {
+        // Tight, compact core
         const u = Math.random();
         const v = Math.random();
         const theta = u * 2.0 * Math.PI;
@@ -134,40 +147,47 @@ export class GalaxyGenerator {
         const coreDist = Math.cbrt(Math.random()) * coreRadius;
 
         positions[i3] = coreDist * Math.sin(phi) * Math.cos(theta);
-        positions[i3 + 1] = coreDist * Math.sin(phi) * Math.sin(theta) * 0.55; // Slightly flattened
+        positions[i3 + 1] = coreDist * Math.sin(phi) * Math.sin(theta) * 0.35;
         positions[i3 + 2] = coreDist * Math.cos(phi);
+
+        // Core colors: tiny bright white center quickly transitioning into brilliant cyan and magenta halo
+        const normDist = coreDist / coreRadius;
+        let c;
+        if (normDist < 0.25) {
+          c = colorCore.clone().lerp(colorCoreGlow, normDist / 0.25);
+        } else {
+          c = colorCoreGlow.clone().lerp(colorAccent, (normDist - 0.25) / 0.75);
+        }
+        colors[i3] = c.r;
+        colors[i3 + 1] = c.g;
+        colors[i3 + 2] = c.b;
       } else {
+        // Spiral arms
         positions[i3] = Math.cos(branchAngle + spinAngle) * r;
         positions[i3 + 1] = 0;
         positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * r;
-      }
 
-      // Color interpolation: Core -> Inner Arm -> Outer Rim
-      let mixedColor;
-      if (r < coreRadius) {
-        // Core: warm radiant gold/white
-        const alpha = r / coreRadius;
-        mixedColor = colorCore.clone().lerp(colorInner, alpha * 0.4);
-      } else {
-        // Spiral arms: blend from inner arm color to outer arm cyan/blue
+        // Rich, high-contrast arm gradient matching reference image:
+        // Cyan-blue -> Royal Blue -> Deep Electric Blue with frequent Magenta/Violet accents
         const alpha = (r - coreRadius) / (radius - coreRadius);
-        mixedColor = colorInner.clone().lerp(colorOuter, alpha);
-        // Add occasional blue-white massive star highlights
-        if (Math.random() > 0.92) {
-          mixedColor.lerp(new THREE.Color('#ffffff'), 0.75);
+        let c = colorInner.clone().lerp(colorOuter, alpha);
+
+        // 25% of stars along the spiral arms are vibrant magenta / violet / turquoise highlights
+        const rand = Math.random();
+        if (rand > 0.82) {
+          c = colorAccent.clone();
+        } else if (rand > 0.68) {
+          c = colorCoreGlow.clone(); // Cyan highlight
         }
+
+        colors[i3] = c.r;
+        colors[i3 + 1] = c.g;
+        colors[i3 + 2] = c.b;
       }
 
-      colors[i3] = mixedColor.r;
-      colors[i3 + 1] = mixedColor.g;
-      colors[i3 + 2] = mixedColor.b;
-
-      // Particle scale (core stars smaller & denser, some giant foreground stars)
-      const isGiantStar = Math.random() > 0.985;
-      scales[i] = isGiantStar ? 2.5 + Math.random() * 3.0 : 0.8 + Math.random() * 1.4;
-
-      // Twinkle speed
-      twinkleSpeeds[i] = 1.0 + Math.random() * 4.0;
+      // Star sizes: fine, controlled, not overly large
+      scales[i] = 0.65 + Math.random() * 1.1;
+      twinkleSpeeds[i] = 1.2 + Math.random() * 3.5;
     }
 
     this.geometry = new THREE.BufferGeometry();
@@ -175,10 +195,9 @@ export class GalaxyGenerator {
     this.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     this.geometry.setAttribute('aScale', new THREE.BufferAttribute(scales, 1));
     this.geometry.setAttribute('aRandomness', new THREE.BufferAttribute(randomnessArray, 3));
-    this.geometry.setAttribute('aDistanceRatio', new THREE.BufferAttribute(distanceRatios, 1));
     this.geometry.setAttribute('aTwinkleSpeed', new THREE.BufferAttribute(twinkleSpeeds, 1));
 
-    // Custom GLSL Shader for smooth antialiased circular particles with glow & twinkle
+    // Custom GLSL Shader that preserves saturated colors without blowing out to white
     this.material = new THREE.ShaderMaterial({
       vertexShader: `
         uniform float uTime;
@@ -187,7 +206,6 @@ export class GalaxyGenerator {
 
         attribute float aScale;
         attribute vec3 aRandomness;
-        attribute float aDistanceRatio;
         attribute float aTwinkleSpeed;
 
         varying vec3 vColor;
@@ -196,57 +214,47 @@ export class GalaxyGenerator {
         void main() {
           vColor = color;
 
-          // Differential orbital rotation (Keplerian-inspired flat rotation curve)
-          // Stars closer to core complete revolution slightly faster
           float dist = length(position.xz);
-          float orbitSpeed = uTime * uSpeed * 0.15 * (1.0 / (1.0 + dist * 0.015));
+          // Rotation speed curve
+          float orbitSpeed = uTime * uSpeed * 0.12 * (1.0 / (1.0 + dist * 0.012));
 
-          // Rotate position in XZ plane
           float cosA = cos(orbitSpeed);
           float sinA = sin(orbitSpeed);
           vec3 rotatedPos = position;
           rotatedPos.x = position.x * cosA - position.z * sinA;
           rotatedPos.z = position.x * sinA + position.z * cosA;
 
-          // Add dispersion
           vec3 finalPos = rotatedPos + aRandomness;
 
           vec4 modelPosition = modelMatrix * vec4(finalPos, 1.0);
           vec4 viewPosition = viewMatrix * modelPosition;
-          vec4 projectedPosition = projectionMatrix * viewPosition;
+          gl_Position = projectionMatrix * viewPosition;
 
-          gl_Position = projectedPosition;
-
-          // Particle twinkle effect
-          float twinkle = sin(uTime * aTwinkleSpeed + finalPos.x * 0.5) * 0.25 + 0.75;
+          // Twinkle pulse
+          float twinkle = sin(uTime * aTwinkleSpeed + finalPos.x * 0.4 + finalPos.z * 0.4) * 0.22 + 0.78;
           vTwinkle = twinkle;
 
-          // Size attenuation
-          gl_PointSize = uSize * aScale * twinkle * (280.0 / -viewPosition.z);
-          gl_PointSize = max(gl_PointSize, 1.0);
+          // Controlled point size to keep galaxy structure sharp and clean
+          gl_PointSize = uSize * aScale * twinkle * (210.0 / -viewPosition.z);
+          gl_PointSize = clamp(gl_PointSize, 1.0, 16.0);
         }
       `,
       fragmentShader: `
         varying vec3 vColor;
+        varying float vAlpha;
         varying float vTwinkle;
 
         void main() {
-          // Distance from particle center [0.0, 0.5]
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
 
-          // Soft exponential radial glow falloff
-          float coreIntensity = exp(-dist * 9.0) * 1.4;
-          float haloIntensity = (1.0 - smoothstep(0.0, 0.5, dist)) * 0.6;
-          float strength = coreIntensity + haloIntensity;
+          // Crisp, soft star with glowing core
+          float intensity = exp(-dist * 10.0) * 1.3;
+          float halo = (1.0 - smoothstep(0.0, 0.5, dist)) * 0.5;
+          float strength = intensity + halo;
 
-          // Final color with emissive vibrancy
+          // Keep colors deeply saturated, do NOT force white!
           vec3 finalColor = vColor * strength * vTwinkle;
-
-          // Extra bright center
-          if (dist < 0.12) {
-            finalColor += vec3(0.5, 0.5, 0.5) * (1.0 - dist / 0.12);
-          }
 
           gl_FragColor = vec4(finalColor, strength);
         }
@@ -257,7 +265,7 @@ export class GalaxyGenerator {
       transparent: true,
       uniforms: {
         uTime: { value: 0 },
-        uSize: { value: 25.0 * window.devicePixelRatio },
+        uSize: { value: 16.0 * window.devicePixelRatio },
         uSpeed: { value: this.parameters.speed }
       }
     });
@@ -266,10 +274,130 @@ export class GalaxyGenerator {
     this.scene.add(this.points);
   }
 
+  // Floating Dreamy Bokeh Orbs (exactly matching the large soft circles in the reference photo)
+  generateBokehOrbs() {
+    if (this.bokehMesh !== null) {
+      this.bokehGeo.dispose();
+      this.bokehMat.dispose();
+      this.scene.remove(this.bokehMesh);
+    }
+
+    const bokehCount = 1200;
+    const positions = new Float32Array(bokehCount * 3);
+    const colors = new Float32Array(bokehCount * 3);
+    const scales = new Float32Array(bokehCount);
+    const phases = new Float32Array(bokehCount);
+
+    const bokehPalettes = [
+      new THREE.Color('#38bdf8'), // Cyan
+      new THREE.Color('#00f5ff'), // Neon Aqua
+      new THREE.Color('#3b82f6'), // Electric Blue
+      new THREE.Color('#818cf8'), // Soft Lavender
+      new THREE.Color('#c084fc'), // Orchid Pink
+      new THREE.Color('#34d399')  // Turquoise / Mint
+    ];
+
+    for (let i = 0; i < bokehCount; i++) {
+      const i3 = i * 3;
+
+      // Distribute along the spiral disk
+      const r = 8 + Math.pow(Math.random(), 1.8) * 115;
+      const angle = Math.random() * Math.PI * 2;
+
+      // Float gently above and below the galactic plane
+      const h = (Math.random() - 0.5) * 22.0;
+
+      positions[i3] = Math.cos(angle) * r;
+      positions[i3 + 1] = h;
+      positions[i3 + 2] = Math.sin(angle) * r;
+
+      const c = bokehPalettes[Math.floor(Math.random() * bokehPalettes.length)];
+      colors[i3] = c.r;
+      colors[i3 + 1] = c.g;
+      colors[i3 + 2] = c.b;
+
+      // Large bokeh orb scale
+      scales[i] = 16.0 + Math.random() * 32.0;
+      phases[i] = Math.random() * Math.PI * 2;
+    }
+
+    this.bokehGeo = new THREE.BufferGeometry();
+    this.bokehGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    this.bokehGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    this.bokehGeo.setAttribute('aScale', new THREE.BufferAttribute(scales, 1));
+    this.bokehGeo.setAttribute('aPhase', new THREE.BufferAttribute(phases, 1));
+
+    // Custom Bokeh Shader: creates translucent optical circle with soft rim
+    this.bokehMat = new THREE.ShaderMaterial({
+      vertexShader: `
+        uniform float uTime;
+        attribute float aScale;
+        attribute float aPhase;
+        varying vec3 vColor;
+        varying float vAlpha;
+
+        void main() {
+          vColor = color;
+
+          vec3 p = position;
+          // Slow floating drift in Y axis
+          p.y += sin(uTime * 0.8 + aPhase) * 1.5;
+
+          // Slow rotation around galaxy center
+          float dist = length(p.xz);
+          float angle = uTime * 0.035;
+          float cosA = cos(angle);
+          float sinA = sin(angle);
+          float nx = p.x * cosA - p.z * sinA;
+          float nz = p.x * sinA + p.z * cosA;
+          p.x = nx;
+          p.z = nz;
+
+          vec4 mvPos = modelViewMatrix * vec4(p, 1.0);
+          gl_Position = projectionMatrix * mvPos;
+
+          // Soft breathing opacity
+          vAlpha = 0.35 + sin(uTime * 1.2 + aPhase) * 0.12;
+
+          gl_PointSize = aScale * (120.0 / -mvPos.z);
+          gl_PointSize = clamp(gl_PointSize, 2.0, 48.0);
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+        varying float vAlpha;
+
+        void main() {
+          float dist = length(gl_PointCoord - vec2(0.5));
+          if (dist > 0.5) discard;
+
+          // Camera lens bokeh appearance: soft edge with luminous circular rim
+          float edge = smoothstep(0.5, 0.42, dist);
+          float rim = smoothstep(0.25, 0.46, dist) * 0.6;
+          float body = (1.0 - smoothstep(0.0, 0.45, dist)) * 0.4;
+          float bokeh = (edge * 0.35 + rim + body);
+
+          gl_FragColor = vec4(vColor, bokeh * vAlpha);
+        }
+      `,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      vertexColors: true,
+      transparent: true,
+      uniforms: {
+        uTime: { value: 0 }
+      }
+    });
+
+    this.bokehMesh = new THREE.Points(this.bokehGeo, this.bokehMat);
+    this.scene.add(this.bokehMesh);
+  }
+
   setTheme(themeKey) {
     if (COLOR_THEMES[themeKey]) {
       this.parameters.currentTheme = themeKey;
       this.generate();
+      this.generateBokehOrbs();
     }
   }
 
@@ -288,6 +416,9 @@ export class GalaxyGenerator {
   update(elapsedTime) {
     if (this.material && this.material.uniforms.uTime) {
       this.material.uniforms.uTime.value = elapsedTime;
+    }
+    if (this.bokehMat && this.bokehMat.uniforms.uTime) {
+      this.bokehMat.uniforms.uTime.value = elapsedTime;
     }
   }
 }

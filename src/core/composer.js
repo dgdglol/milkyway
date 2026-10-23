@@ -10,12 +10,14 @@ export function createComposer(renderer, scene, camera) {
   const renderPass = new RenderPass(scene, camera);
   composer.addPass(renderPass);
 
-  // Unreal Bloom Pass for celestial glow
+  // Unreal Bloom Pass tuned for high contrast:
+  // Higher threshold (0.32) ensures background remains deep void black and colors stay rich & saturated
+  // Strength (0.95) provides magical celestial aura without blowing out the galaxy into pure white
   const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(window.innerWidth, window.innerHeight),
-    1.55,  // strength
-    0.85,  // radius
-    0.08   // threshold
+    0.95,  // strength (vừa phải, sắc nét, không bị chói lóa)
+    0.65,  // radius
+    0.32   // threshold (chỉ phần nhân cực sáng mới phát hào quang, giữ rõ các nhánh xoắn)
   );
 
   composer.addPass(bloomPass);
