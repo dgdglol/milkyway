@@ -62,9 +62,9 @@ export class LightPillar {
           vec3 color = mix(gold, cyan, smoothstep(0.0, 0.35, h));
           color = mix(color, periwinkle, smoothstep(0.35, 1.0, h));
 
-          float alpha = verticalFade * (fresnel * 0.75 + 0.18) * stream * 0.35;
+          float alpha = verticalFade * (fresnel * 0.75 + 0.18) * stream * 0.16;
 
-          gl_FragColor = vec4(color * 1.05, alpha);
+          gl_FragColor = vec4(color * 0.75, alpha);
         }
       `,
       transparent: true,
@@ -100,10 +100,10 @@ export class LightPillar {
 
           float pulse = sin(uTime * 3.0 + vUv.y * 10.0) * 0.15 + 0.85;
 
-          vec3 coreColor = vec3(0.7, 0.95, 1.0); // Bright radiant cyan-white
-          float alpha = verticalFade * pulse * 0.35;
+          vec3 coreColor = vec3(0.55, 0.75, 0.85);
+          float alpha = verticalFade * pulse * 0.14;
 
-          gl_FragColor = vec4(coreColor * 1.1, alpha);
+          gl_FragColor = vec4(coreColor * 0.8, alpha);
         }
       `,
       transparent: true,
@@ -130,7 +130,7 @@ export class LightPillar {
         color: i % 2 === 0 ? 0x00f5ff : 0xd946ef,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.22,
+        opacity: 0.10,
         blending: THREE.AdditiveBlending,
         depthWrite: false
       });

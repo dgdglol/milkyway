@@ -211,9 +211,9 @@ export class GalaxyGenerator {
           float twinkle = sin(uTime * aTwinkleSpeed + finalPos.x * 0.35 + finalPos.z * 0.35) * 0.18 + 0.82;
           vTwinkle = twinkle;
 
-          // Hạt sao nhỏ thanh mảnh, không chói
-          gl_PointSize = uSize * aScale * twinkle * (170.0 / -viewPosition.z);
-          gl_PointSize = clamp(gl_PointSize, 1.0, 8.0);
+          // Hạt sao siêu nhỏ thanh mảnh, dịu mắt chuẩn 100,000 Stars
+          gl_PointSize = uSize * aScale * twinkle * (140.0 / -viewPosition.z);
+          gl_PointSize = clamp(gl_PointSize, 1.0, 4.5);
         }
       `,
       fragmentShader: `
@@ -224,13 +224,13 @@ export class GalaxyGenerator {
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
 
-          // Đốm sao thanh mảnh, độ sáng 0.42 dịu mắt
+          // Đốm sao li ti dịu nhẹ
           float intensity = (1.0 - smoothstep(0.0, 0.5, dist));
           intensity = pow(intensity, 2.0);
 
-          vec3 finalColor = vColor * intensity * vTwinkle * 0.55;
+          vec3 finalColor = vColor * intensity * vTwinkle * 0.32;
 
-          gl_FragColor = vec4(finalColor, intensity * 0.65);
+          gl_FragColor = vec4(finalColor, intensity * 0.4);
         }
       `,
       depthWrite: false,
@@ -239,7 +239,7 @@ export class GalaxyGenerator {
       transparent: true,
       uniforms: {
         uTime: { value: 0 },
-        uSize: { value: 5.5 * window.devicePixelRatio },
+        uSize: { value: 3.6 * window.devicePixelRatio },
         uSpeed: { value: this.parameters.speed }
       }
     });

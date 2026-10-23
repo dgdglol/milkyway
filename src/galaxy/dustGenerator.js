@@ -5,12 +5,12 @@ export class DustGenerator {
     this.scene = scene;
     this.group = new THREE.Group();
 
-    // 5 Lớp mây dày đặc, rõ nét chuẩn ảnh minh họa NASA:
-    // 1. Dải mây xoắn ốc chính dày dặn, rõ ràng (Thick Arm Clouds)
-    // 2. Thanh chắn trung tâm màu vàng mật ong đậm đà (Dense Golden Bar)
-    // 3. Sương mù mờ ảo phủ khắp đĩa nối liền các nhánh (Inter-arm Connecting Haze)
-    // 4. Dải bụi tối nâu đỏ viền trong các nhánh (Deep Dark Dust Filaments)
-    // 5. Đốm hồng ngọc vườn ươm sao HII rực rỡ (Ruby HII Nebulae)
+    // Hệ thống mây thiên văn tông màu tối trầm (Dark & Moody NASA / Google Data Arts Style):
+    // 1. Dải mây xoắn ốc xanh lam khói trầm (Dark Smoky Arm Clouds)
+    // 2. Thanh chắn trung tâm màu đồng cổ / hổ phách trầm (Antique Bronze & Amber Bar)
+    // 3. Màn sương nối mờ dịu sâu thẳm (Deep Space Inter-arm Haze)
+    // 4. Dải bụi tối đen tuyền viền trong (Espresso Dust Filaments)
+    // 5. Đốm hồng ngọc HII trầm (Deep Ruby Nebulae)
     this.armClouds = null;
     this.barClouds = null;
     this.interArmMist = null;
@@ -18,7 +18,7 @@ export class DustGenerator {
     this.hiiNebulae = null;
 
     this.materials = [];
-    this.speed = 0.24;
+    this.speed = 0.22;
     this.visible = true;
 
     this.init();
@@ -38,17 +38,16 @@ export class DustGenerator {
     }
     this.materials = [];
 
-    // Tạo các tầng mây theo đúng cấu trúc ảnh NASA
-    this.createInterArmConnectingMist();
-    this.createThickArmClouds();
-    this.createDenseCentralBar();
-    this.createDeepDarkDustLanes();
-    this.createRubyHIINebulae();
+    this.createDeepInterArmMist();
+    this.createDarkSmokyArmClouds();
+    this.createAntiqueBronzeBar();
+    this.createEspressoDustLanes();
+    this.createDeepRubyHIINebulae();
   }
 
-  // 1. DẢI MÂY XOẮN ỐC CHÍNH DÀY DẶN & RÕ NÉT (Thick Arm Clouds)
-  createThickArmClouds() {
-    const count = 55000;
+  // 1. DẢI MÂY XOẮN ỐC XANH LAM KHÓI TRẦM (Dark Smoky Arm Clouds)
+  createDarkSmokyArmClouds() {
+    const count = 48000;
     const radius = 118;
     const branches = 4;
     const spin = 1.65;
@@ -58,13 +57,12 @@ export class DustGenerator {
     const scales = new Float32Array(count);
     const randomnessArray = new Float32Array(count * 3);
 
-    // Bảng màu mây xanh lam sữa, xanh thiên thanh và periwinkle sáng rõ như ảnh NASA
+    // Bảng màu xanh lam khói đậm, xanh denim sẫm, không bị chói sáng
     const cloudPalettes = [
-      new THREE.Color('#93c5fd'), // Xanh lam sáng rõ
-      new THREE.Color('#bfdbfe'), // Xanh sữa băng tuyết
-      new THREE.Color('#7aa2db'), // Xanh thiên thanh
-      new THREE.Color('#a5b4fc'), // Tím nhạt Periwinkle
-      new THREE.Color('#60a5fa')  // Xanh lam ngọc
+      new THREE.Color('#253d63'), // Xanh lam khói đậm
+      new THREE.Color('#1c2e4a'), // Xanh đêm sâu
+      new THREE.Color('#152338'), // Xanh navy sẫm
+      new THREE.Color('#2f4870')  // Xanh denim dịu
     ];
 
     for (let i = 0; i < count; i++) {
@@ -80,8 +78,7 @@ export class DustGenerator {
       positions[i3 + 1] = 0;
       positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * r;
 
-      // Độ rộng dải mây ôm trọn các nhánh
-      const spread = (0.7 + rRatio * 0.45) * 5.8;
+      const spread = (0.7 + rRatio * 0.45) * 5.5;
       randomnessArray[i3] = (Math.random() - 0.5) * spread;
       randomnessArray[i3 + 1] = (Math.random() - 0.5) * 2.5;
       randomnessArray[i3 + 2] = (Math.random() - 0.5) * spread;
@@ -91,8 +88,7 @@ export class DustGenerator {
       colors[i3 + 1] = c.g;
       colors[i3 + 2] = c.b;
 
-      // Hạt mây lớn, phủ dày tạo thành khối mây liền mạch không bị đứt đoạn
-      scales[i] = 22.0 + Math.random() * 26.0;
+      scales[i] = 20.0 + Math.random() * 24.0;
     }
 
     const geo = new THREE.BufferGeometry();
@@ -126,11 +122,11 @@ export class DustGenerator {
           vec4 mvPos = modelViewMatrix * vec4(finalPos, 1.0);
           gl_Position = projectionMatrix * mvPos;
 
-          // Độ đục tăng cao (0.42) để mây hiện rõ ràng, sắc nét và bồng bềnh
-          vAlpha = 0.42 + sin(uTime * 0.5 + dist * 0.1) * 0.05;
+          // Độ đục êm dịu (0.24) giúp mây hiện rõ khối mà không bị sáng lóa
+          vAlpha = 0.24 + sin(uTime * 0.5 + dist * 0.1) * 0.03;
 
-          gl_PointSize = aScale * (135.0 / -mvPos.z);
-          gl_PointSize = clamp(gl_PointSize, 2.0, 56.0);
+          gl_PointSize = aScale * (125.0 / -mvPos.z);
+          gl_PointSize = clamp(gl_PointSize, 1.0, 52.0);
         }
       `,
       fragmentShader: `
@@ -141,11 +137,11 @@ export class DustGenerator {
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
 
-          // Mây bồng bềnh dày dặn với đường cong falloff mềm 1.3
           float strength = 1.0 - smoothstep(0.0, 0.5, dist);
-          strength = pow(strength, 1.3);
+          strength = pow(strength, 1.5);
 
-          gl_FragColor = vec4(vColor * 1.1, strength * vAlpha);
+          // Nhân hệ số 0.45 để kiểm soát tuyệt đối không bao giờ bị chói trắng
+          gl_FragColor = vec4(vColor * 0.45, strength * vAlpha);
         }
       `,
       depthWrite: false,
@@ -163,19 +159,19 @@ export class DustGenerator {
     this.group.add(this.armClouds);
   }
 
-  // 2. THANH CHẮN TRUNG TÂM VÀNG MẬT ONG DÀY DẶN & RÕ NÉT (Dense Golden Bar)
-  createDenseCentralBar() {
-    const count = 16000;
+  // 2. THANH CHẮN TRUNG TÂM MÀU ĐỒNG CỔ / HỔ PHÁCH TRẦM (Antique Bronze Bar)
+  createAntiqueBronzeBar() {
+    const count = 14000;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const scales = new Float32Array(count);
 
-    // Sắc vàng mật ong, vàng kem champagne đậm đà chuẩn ảnh NASA
+    // Sắc màu vàng đồng cổ, hổ phách dịu trầm, không chói mắt
     const barColors = [
-      new THREE.Color('#fde68a'), // Vàng kem champagne
-      new THREE.Color('#fcd34d'), // Vàng hổ phách
-      new THREE.Color('#f59e0b'), // Vàng cam ấm
-      new THREE.Color('#fbbf24')  // Vàng mật ong
+      new THREE.Color('#8a6525'), // Vàng đồng cổ
+      new THREE.Color('#6e4f1a'), // Hổ phách trầm
+      new THREE.Color('#9c7530'), // Cát vàng sẫm
+      new THREE.Color('#583e12')  // Nâu đồng dịu
     ];
 
     const barAngle = Math.PI * 0.19;
@@ -185,14 +181,13 @@ export class DustGenerator {
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
 
-      // Khối elip thanh chắn dày dặn
       const u = (Math.random() - 0.5) * 2;
       const v = (Math.random() - 0.5) * 2;
-      const lx = u * 16.5 * Math.sqrt(Math.max(0, 1 - (v * v) / 1.4));
-      const lz = v * 5.8 * Math.sqrt(Math.max(0, 1 - (u * u) / 1.4));
+      const lx = u * 16.0 * Math.sqrt(Math.max(0, 1 - (v * v) / 1.4));
+      const lz = v * 5.5 * Math.sqrt(Math.max(0, 1 - (u * u) / 1.4));
 
       positions[i3] = lx * cosBar - lz * sinBar;
-      positions[i3 + 1] = (Math.random() - 0.5) * 2.5;
+      positions[i3 + 1] = (Math.random() - 0.5) * 2.2;
       positions[i3 + 2] = lx * sinBar + lz * cosBar;
 
       const c = barColors[Math.floor(Math.random() * barColors.length)];
@@ -200,7 +195,7 @@ export class DustGenerator {
       colors[i3 + 1] = c.g;
       colors[i3 + 2] = c.b;
 
-      scales[i] = 18.0 + Math.random() * 22.0;
+      scales[i] = 16.0 + Math.random() * 20.0;
     }
 
     const geo = new THREE.BufferGeometry();
@@ -230,10 +225,9 @@ export class DustGenerator {
           vec4 mvPos = modelViewMatrix * vec4(rotatedPos, 1.0);
           gl_Position = projectionMatrix * mvPos;
 
-          // Thanh chắn vàng hiện rõ nét đậm đà (0.50)
-          vAlpha = 0.50 + sin(uTime * 0.6 + dist * 0.15) * 0.05;
-          gl_PointSize = aScale * (135.0 / -mvPos.z);
-          gl_PointSize = clamp(gl_PointSize, 2.0, 56.0);
+          vAlpha = 0.28 + sin(uTime * 0.6 + dist * 0.15) * 0.03;
+          gl_PointSize = aScale * (125.0 / -mvPos.z);
+          gl_PointSize = clamp(gl_PointSize, 1.0, 50.0);
         }
       `,
       fragmentShader: `
@@ -244,8 +238,8 @@ export class DustGenerator {
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
           float strength = 1.0 - smoothstep(0.0, 0.5, dist);
-          strength = pow(strength, 1.3);
-          gl_FragColor = vec4(vColor * 1.15, strength * vAlpha);
+          strength = pow(strength, 1.5);
+          gl_FragColor = vec4(vColor * 0.45, strength * vAlpha);
         }
       `,
       depthWrite: false,
@@ -263,29 +257,28 @@ export class DustGenerator {
     this.group.add(this.barClouds);
   }
 
-  // 3. SƯƠNG MÙ NỐI LIỀN GIỮA CÁC DẢI MÂY VÀ BAO QUANH ĐĨA (Inter-arm Connecting Haze)
-  createInterArmConnectingMist() {
-    const count = 35000;
+  // 3. MÀN SƯƠNG NỐI MỜ DỊU SÂU THẲM (Deep Space Inter-arm Haze)
+  createDeepInterArmMist() {
+    const count = 30000;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const scales = new Float32Array(count);
 
-    // Mây sương xanh lam khói nhẹ nhàng làm nền nối các nhánh
     const mistColors = [
-      new THREE.Color('#4a6fa5'),
-      new THREE.Color('#3b5987'),
-      new THREE.Color('#2e476e'),
-      new THREE.Color('#5b7ba8')
+      new THREE.Color('#1c2e47'),
+      new THREE.Color('#152336'),
+      new THREE.Color('#0f1b2b'),
+      new THREE.Color('#223652')
     ];
 
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
 
-      const r = 8 + Math.pow(Math.random(), 1.35) * 122;
+      const r = 8 + Math.pow(Math.random(), 1.35) * 120;
       const angle = Math.random() * Math.PI * 2;
 
       positions[i3] = Math.cos(angle) * r;
-      positions[i3 + 1] = (Math.random() - 0.5) * 3.6;
+      positions[i3 + 1] = (Math.random() - 0.5) * 3.4;
       positions[i3 + 2] = Math.sin(angle) * r;
 
       const c = mistColors[Math.floor(Math.random() * mistColors.length)];
@@ -293,7 +286,7 @@ export class DustGenerator {
       colors[i3 + 1] = c.g;
       colors[i3 + 2] = c.b;
 
-      scales[i] = 26.0 + Math.random() * 32.0;
+      scales[i] = 24.0 + Math.random() * 28.0;
     }
 
     const geo = new THREE.BufferGeometry();
@@ -323,12 +316,11 @@ export class DustGenerator {
           vec4 mvPos = modelViewMatrix * vec4(rotatedPos, 1.0);
           gl_Position = projectionMatrix * mvPos;
 
-          // Màn sương rõ ràng (0.22) nối liền giữa các dải mây
-          float fade = 1.0 - smoothstep(35.0, 130.0, dist);
-          vAlpha = (0.22 + sin(uTime * 0.5 + dist * 0.08) * 0.03) * fade;
+          float fade = 1.0 - smoothstep(35.0, 125.0, dist);
+          vAlpha = (0.15 + sin(uTime * 0.5 + dist * 0.08) * 0.02) * fade;
 
-          gl_PointSize = aScale * (130.0 / -mvPos.z);
-          gl_PointSize = clamp(gl_PointSize, 2.0, 58.0);
+          gl_PointSize = aScale * (120.0 / -mvPos.z);
+          gl_PointSize = clamp(gl_PointSize, 1.0, 50.0);
         }
       `,
       fragmentShader: `
@@ -339,8 +331,8 @@ export class DustGenerator {
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
           float strength = 1.0 - smoothstep(0.0, 0.5, dist);
-          strength = pow(strength, 1.4);
-          gl_FragColor = vec4(vColor, strength * vAlpha);
+          strength = pow(strength, 1.6);
+          gl_FragColor = vec4(vColor * 0.35, strength * vAlpha);
         }
       `,
       depthWrite: false,
@@ -358,8 +350,8 @@ export class DustGenerator {
     this.group.add(this.interArmMist);
   }
 
-  // 4. DẢI BỤI TỐI NÂU ĐỎ VIỀN TRONG CÁC NHÁNH (Deep Dark Dust Filaments)
-  createDeepDarkDustLanes() {
+  // 4. DẢI BỤI TỐI ĐEN TUYỀN VIỀN TRONG (Espresso Dust Filaments)
+  createEspressoDustLanes() {
     const count = 18000;
     const radius = 110;
     const branches = 4;
@@ -370,10 +362,10 @@ export class DustGenerator {
     const scales = new Float32Array(count);
 
     const dustPalette = [
-      new THREE.Color('#2e1104'),
-      new THREE.Color('#451a03'),
-      new THREE.Color('#1c0902'),
-      new THREE.Color('#38094d')
+      new THREE.Color('#1c0a02'),
+      new THREE.Color('#2b1004'),
+      new THREE.Color('#120501'),
+      new THREE.Color('#20052c')
     ];
 
     for (let i = 0; i < count; i++) {
@@ -424,8 +416,8 @@ export class DustGenerator {
           vec4 mvPos = modelViewMatrix * vec4(rotatedPos, 1.0);
           gl_Position = projectionMatrix * mvPos;
 
-          gl_PointSize = aScale * (120.0 / -mvPos.z);
-          gl_PointSize = clamp(gl_PointSize, 2.0, 42.0);
+          gl_PointSize = aScale * (115.0 / -mvPos.z);
+          gl_PointSize = clamp(gl_PointSize, 1.0, 38.0);
         }
       `,
       fragmentShader: `
@@ -434,7 +426,7 @@ export class DustGenerator {
         void main() {
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
-          float strength = (1.0 - smoothstep(0.0, 0.5, dist)) * 0.42;
+          float strength = (1.0 - smoothstep(0.0, 0.5, dist)) * 0.38;
           gl_FragColor = vec4(vColor, strength);
         }
       `,
@@ -453,9 +445,9 @@ export class DustGenerator {
     this.group.add(this.darkDust);
   }
 
-  // 5. ĐỐM HỒNG NGỌC VƯỜN ƯƠM SAO HII RỰC RỠ (Ruby HII Nebulae)
-  createRubyHIINebulae() {
-    const count = 1200;
+  // 5. ĐỐM HỒNG NGỌC HII TRẦM (Deep Ruby Nebulae)
+  createDeepRubyHIINebulae() {
+    const count = 1000;
     const radius = 105;
     const branches = 4;
     const spin = 1.65;
@@ -465,10 +457,10 @@ export class DustGenerator {
     const scales = new Float32Array(count);
 
     const redHues = [
-      new THREE.Color('#f43f5e'), // Ruby pink rõ nét
-      new THREE.Color('#fb7185'), // Coral
-      new THREE.Color('#fda4af'), // Pastel rose
-      new THREE.Color('#e11d48')  // Crimson
+      new THREE.Color('#801c32'),
+      new THREE.Color('#6b1427'),
+      new THREE.Color('#94243b'),
+      new THREE.Color('#5c0f20')
     ];
 
     for (let i = 0; i < count; i++) {
@@ -480,16 +472,16 @@ export class DustGenerator {
       const branchAngle = ((i % branches) / branches) * Math.PI * 2;
       const spinAngle = r * spin * 0.055;
 
-      positions[i3] = Math.cos(branchAngle + spinAngle) * r + (Math.random() - 0.5) * 4.2;
+      positions[i3] = Math.cos(branchAngle + spinAngle) * r + (Math.random() - 0.5) * 4.0;
       positions[i3 + 1] = (Math.random() - 0.5) * 1.5;
-      positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * r + (Math.random() - 0.5) * 4.2;
+      positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * r + (Math.random() - 0.5) * 4.0;
 
       const c = redHues[Math.floor(Math.random() * redHues.length)];
       colors[i3] = c.r;
       colors[i3 + 1] = c.g;
       colors[i3 + 2] = c.b;
 
-      scales[i] = 12.0 + Math.random() * 18.0;
+      scales[i] = 10.0 + Math.random() * 16.0;
     }
 
     const geo = new THREE.BufferGeometry();
@@ -519,9 +511,9 @@ export class DustGenerator {
           vec4 mvPos = modelViewMatrix * vec4(rotatedPos, 1.0);
           gl_Position = projectionMatrix * mvPos;
 
-          vAlpha = 0.55 + sin(uTime * 1.5 + dist * 0.3) * 0.15;
-          gl_PointSize = aScale * (120.0 / -mvPos.z);
-          gl_PointSize = clamp(gl_PointSize, 2.0, 42.0);
+          vAlpha = 0.32 + sin(uTime * 1.5 + dist * 0.3) * 0.08;
+          gl_PointSize = aScale * (115.0 / -mvPos.z);
+          gl_PointSize = clamp(gl_PointSize, 1.0, 36.0);
         }
       `,
       fragmentShader: `
@@ -533,7 +525,7 @@ export class DustGenerator {
           if (dist > 0.5) discard;
           float strength = 1.0 - smoothstep(0.0, 0.5, dist);
           strength = pow(strength, 1.6);
-          gl_FragColor = vec4(vColor * 1.25, strength * vAlpha);
+          gl_FragColor = vec4(vColor * 0.5, strength * vAlpha);
         }
       `,
       depthWrite: false,

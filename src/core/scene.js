@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 
 export function createScene(canvas) {
-  // Scene with deep pitch black cosmic void
+  // Scene with deep velvety black cosmic void
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x000104, 0.0008);
+  scene.fog = new THREE.FogExp2(0x000103, 0.0008);
 
   // Camera looking at galaxy
   const camera = new THREE.PerspectiveCamera(
@@ -14,7 +14,7 @@ export function createScene(canvas) {
   );
   camera.position.set(0, 95, 145);
 
-  // High performance WebGL renderer with dark, moody tone mapping
+  // High performance WebGL renderer with dark, velvety exposure
   const renderer = new THREE.WebGLRenderer({
     canvas,
     powerPreference: 'high-performance',
@@ -26,12 +26,12 @@ export function createScene(canvas) {
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.02; // Tăng độ phơi sáng để dải mây hiện rõ nét
+  renderer.toneMappingExposure = 0.72; // Tone tối đằm, sâu thẳm, không bao giờ bị chói
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   // Background deep space stars (nhẹ nhàng, mờ ảo xa xôi)
   const bgStarGeo = new THREE.BufferGeometry();
-  const bgCount = 8000;
+  const bgCount = 6000;
   const bgPositions = new Float32Array(bgCount * 3);
   const bgColors = new Float32Array(bgCount * 3);
 
@@ -44,19 +44,19 @@ export function createScene(canvas) {
     bgPositions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
     bgPositions[i * 3 + 2] = r * Math.cos(phi);
 
-    bgColors[i * 3] = 0.35;
-    bgColors[i * 3 + 1] = 0.45;
-    bgColors[i * 3 + 2] = 0.65;
+    bgColors[i * 3] = 0.2;
+    bgColors[i * 3 + 1] = 0.3;
+    bgColors[i * 3 + 2] = 0.45;
   }
 
   bgStarGeo.setAttribute('position', new THREE.BufferAttribute(bgPositions, 3));
   bgStarGeo.setAttribute('color', new THREE.BufferAttribute(bgColors, 3));
 
   const bgStarMat = new THREE.PointsMaterial({
-    size: 1.1,
+    size: 0.9,
     vertexColors: true,
     transparent: true,
-    opacity: 0.35,
+    opacity: 0.25,
     sizeAttenuation: true
   });
 

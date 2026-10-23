@@ -26,10 +26,10 @@ export class SagittariusA {
     // 2. Photon Ring (Cyan-White glow ring)
     const ringGeo = new THREE.RingGeometry(1.62, 1.88, 72);
     const ringMat = new THREE.MeshBasicMaterial({
-      color: 0xfff2cc,
+      color: 0xe8d5a3,
       side: THREE.DoubleSide,
       transparent: true,
-      opacity: 0.85
+      opacity: 0.35
     });
     this.photonRing = new THREE.Mesh(ringGeo, ringMat);
     this.photonRing.rotation.x = Math.PI / 2;
@@ -72,8 +72,8 @@ export class SagittariusA {
           vec3 plasmaColor = mix(coreWhiteGold, midGold, smoothstep(0.22, 0.55, dist));
           plasmaColor = mix(plasmaColor, outerAmber, smoothstep(0.55, 1.0, dist));
 
-          float brightness = 0.8 + swirl * 0.25;
-          gl_FragColor = vec4(plasmaColor * brightness, fade * 0.65);
+          float brightness = 0.65 + swirl * 0.15;
+          gl_FragColor = vec4(plasmaColor * 0.55 * brightness, fade * 0.28);
         }
       `,
       transparent: true,

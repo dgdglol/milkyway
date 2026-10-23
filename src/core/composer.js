@@ -10,14 +10,13 @@ export function createComposer(renderer, scene, camera) {
   const renderPass = new RenderPass(scene, camera);
   composer.addPass(renderPass);
 
-  // Unreal Bloom Pass tinh chỉnh màu tối, dịu mắt chuẩn ảnh thiên văn:
-  // Threshold cao (0.55) và Strength thấp (0.28) để loại bỏ hoàn toàn hiện tượng chói mắt,
-  // giữ nền đen sâu thẳm và dải mây màu trầm tối huyền bí
+  // Unreal Bloom Pass: Giảm tối đa (strength 0.08, threshold 0.75)
+  // Loại bỏ triệt để hiện tượng chói lóa mắt theo đúng phong cách "100,000 Stars" của Google Chrome Experiments
   const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(window.innerWidth, window.innerHeight),
-    0.52,  // strength vừa vặn làm nổi bật dải mây
-    0.55,  // radius
-    0.35   // threshold phù hợp cho dải mây phát sáng dịu
+    0.08,  // Cực kỳ dịu nhẹ, không bị chói sáng
+    0.35,  // radius gọn gàng
+    0.75   // threshold cao, chỉ hạt nhân cực nhỏ mới có ánh hào quang mờ ảo
   );
 
   composer.addPass(bloomPass);
