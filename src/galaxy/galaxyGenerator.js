@@ -56,14 +56,14 @@ export class GalaxyGenerator {
     this.geometry = null;
     this.material = null;
 
-    // Cấu hình sao chuẩn ảnh mẫu: biển sao 95.000 hạt dày dặn, bao phủ toàn bộ đĩa
+    // Cấu hình sao siêu dày đặc: 160.000 hạt sao phủ kín ở giữa, giữa các dải và xung quanh
     this.parameters = {
-      count: 95000,      // Biển sao dày đặc, không góc chết
-      size: 0.007,       // Hạt siêu mịn li ti như hạt cát kim cương
-      radius: 122,
+      count: 160000,     // Biển sao khổng lồ, dày đặc như ảnh thiên văn thực thụ
+      size: 0.0065,      // Hạt cát kim cương siêu mịn
+      radius: 125,
       spin: 1.65,
-      power: 1.65,
-      coreRadius: 8.5,
+      power: 1.55,
+      coreRadius: 9.0,
       currentTheme: 'cosmic',
       speed: 0.22
     };
@@ -116,7 +116,7 @@ export class GalaxyGenerator {
       new THREE.Color('#c25c74')  // Điểm xuyết hồng ngọc mờ (vùng HII)
     ];
 
-    // - Vùng đĩa bao phủ toàn bộ (Inter-arm & Disk stars): sao lùn vàng G/K và sao F/A dịu nhẹ
+    // - Vùng đĩa bao phủ toàn bộ (ở giữa các dải và xung quanh): sao lùn vàng G/K và sao F/A dịu nhẹ
     const diskStarHues = [
       new THREE.Color('#caa05a'), // Sao lùn vàng như Mặt Trời
       new THREE.Color('#ad884c'), // Sao lùn cam
@@ -125,49 +125,49 @@ export class GalaxyGenerator {
       new THREE.Color('#e0ceaa')  // Kem trầm
     ];
 
-    // Phân bổ 3 lớp sao:
-    // 1. Sao nhân & thanh chắn trung tâm (12%): ~11.400 hạt tạo khối elip phát sáng mịn
-    // 2. Sao tập trung dày ở các dải xoắn ốc (45%): ~42.750 hạt làm dải sao dày dặn nổi bật
-    // 3. Sao phủ kín khắp đĩa thiên hà (43%): ~40.850 hạt xóa tan khoảng trống, chỗ nào cũng có sao
-    const coreCount = Math.floor(count * 0.12);
-    const armCount = Math.floor(count * 0.45);
+    // Phân bổ 3 lớp sao dày đặc:
+    // 1. Sao ở giữa (Nhân & thanh chắn elip, ~12.5%): ~20.000 hạt tạo khối lõi phát sáng mịn
+    // 2. Sao dải xoắn ốc (~34.5%): ~55.000 hạt làm các nhánh dày dặn, bồng bềnh
+    // 3. Sao ở giữa các dải và phủ rộng xung quanh (~53%): ~85.000 hạt bao phủ kín mọi khoảng trống
+    const coreCount = Math.floor(count * 0.125);
+    const armCount = Math.floor(count * 0.345);
 
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
 
       if (i < coreCount) {
-        // 1. Sao vùng nhân trung tâm elip
+        // 1. Sao vùng nhân elip ở giữa
         const theta = Math.random() * Math.PI * 2;
         const coreDist = Math.sqrt(Math.random()) * coreRadius;
 
         const barAngle = Math.PI * 0.19;
         const cosB = Math.cos(barAngle);
         const sinB = Math.sin(barAngle);
-        const bx = coreDist * Math.cos(theta) * 1.6;
-        const bz = coreDist * Math.sin(theta) * 0.85;
+        const bx = coreDist * Math.cos(theta) * 1.7;
+        const bz = coreDist * Math.sin(theta) * 0.88;
 
         positions[i3] = bx * cosB - bz * sinB;
-        positions[i3 + 1] = (Math.random() - 0.5) * 1.6;
+        positions[i3 + 1] = (Math.random() - 0.5) * 1.8;
         positions[i3 + 2] = bx * sinB + bz * cosB;
 
-        randomnessArray[i3] = (Math.random() - 0.5) * 0.5;
-        randomnessArray[i3 + 1] = (Math.random() - 0.5) * 0.4;
-        randomnessArray[i3 + 2] = (Math.random() - 0.5) * 0.5;
+        randomnessArray[i3] = (Math.random() - 0.5) * 0.55;
+        randomnessArray[i3 + 1] = (Math.random() - 0.5) * 0.45;
+        randomnessArray[i3 + 2] = (Math.random() - 0.5) * 0.55;
 
         const c = coreStarHues[Math.floor(Math.random() * coreStarHues.length)];
         colors[i3] = c.r;
         colors[i3 + 1] = c.g;
         colors[i3 + 2] = c.b;
 
-        scales[i] = 0.45 + Math.random() * 0.6;
+        scales[i] = 0.42 + Math.random() * 0.58;
         twinkleSpeeds[i] = 0.8 + Math.random() * 2.2;
       } else if (i < coreCount + armCount) {
-        // 2. Sao tập trung trên các dải xoắn ốc (dày hơn rõ rệt)
+        // 2. Sao tập trung trên các dải xoắn ốc (dày dặn nổi bật)
         const armIdx = (i - coreCount) % ARM_PROFILES.length;
         const arm = ARM_PROFILES[armIdx];
 
         const rRatio = Math.pow(Math.random(), power);
-        const r = coreRadius * 0.8 + rRatio * (radius - coreRadius * 0.8);
+        const r = coreRadius * 0.75 + rRatio * (radius - coreRadius * 0.75);
 
         const spinAngle = r * spin * arm.spinFactor * 0.054 + Math.sin(r * 0.08) * 0.12;
         const angle = arm.baseAngle + spinAngle;
@@ -177,14 +177,14 @@ export class GalaxyGenerator {
         positions[i3 + 2] = Math.sin(angle) * r;
 
         // Xòe theo độ rộng to nhỏ tùy hứng của từng dải
-        const armSpread = arm.width(r, rRatio) * 0.85;
+        const armSpread = arm.width(r, rRatio) * 0.88;
         const randRad = (Math.pow(Math.random(), 1.4) - 0.5) * armSpread;
-        const randTan = (Math.random() - 0.5) * armSpread * 0.6;
+        const randTan = (Math.random() - 0.5) * armSpread * 0.62;
         const sinA = Math.sin(angle);
         const cosA = Math.cos(angle);
 
         randomnessArray[i3] = -sinA * randRad + cosA * randTan;
-        randomnessArray[i3 + 1] = (Math.random() - 0.5) * (1.2 + rRatio * 2.4);
+        randomnessArray[i3 + 1] = (Math.random() - 0.5) * (1.2 + rRatio * 2.5);
         randomnessArray[i3 + 2] = cosA * randRad + sinA * randTan;
 
         const c = armStarHues[Math.floor(Math.random() * armStarHues.length)];
@@ -192,28 +192,28 @@ export class GalaxyGenerator {
         colors[i3 + 1] = c.g;
         colors[i3 + 2] = c.b;
 
-        scales[i] = 0.4 + Math.random() * 0.65;
+        scales[i] = 0.38 + Math.random() * 0.62;
         twinkleSpeeds[i] = 0.8 + Math.random() * 2.2;
       } else {
-        // 3. Sao phủ kín khắp đĩa thiên hà (chỗ nào cũng có sao, phủ kín liên tục)
-        const rRatio = Math.pow(Math.random(), 1.35);
-        const r = 4.0 + rRatio * (radius - 4.0);
+        // 3. Sao ở giữa các dải và phủ rộng xung quanh (chiếm hơn 85.000 sao)
+        const rRatio = Math.pow(Math.random(), 1.3);
+        const r = 3.0 + rRatio * (radius - 3.0);
         const angle = Math.random() * Math.PI * 2;
 
         positions[i3] = Math.cos(angle) * r;
         positions[i3 + 1] = 0;
         positions[i3 + 2] = Math.sin(angle) * r;
 
-        randomnessArray[i3] = (Math.random() - 0.5) * 3.6;
-        randomnessArray[i3 + 1] = (Math.random() - 0.5) * (1.4 + (r / radius) * 2.8);
-        randomnessArray[i3 + 2] = (Math.random() - 0.5) * 3.6;
+        randomnessArray[i3] = (Math.random() - 0.5) * 3.8;
+        randomnessArray[i3 + 1] = (Math.random() - 0.5) * (1.4 + (r / radius) * 3.0);
+        randomnessArray[i3 + 2] = (Math.random() - 0.5) * 3.8;
 
         const c = diskStarHues[Math.floor(Math.random() * diskStarHues.length)];
         colors[i3] = c.r;
         colors[i3 + 1] = c.g;
         colors[i3 + 2] = c.b;
 
-        scales[i] = 0.35 + Math.random() * 0.5;
+        scales[i] = 0.32 + Math.random() * 0.48;
         twinkleSpeeds[i] = 0.6 + Math.random() * 1.8;
       }
     }
@@ -261,7 +261,7 @@ export class GalaxyGenerator {
 
           // Hạt sao siêu nhỏ mịn li ti chuẩn tấm thảm sao vũ trụ
           gl_PointSize = uSize * aScale * twinkle * (115.0 / -viewPosition.z);
-          gl_PointSize = clamp(gl_PointSize, 0.7, 2.9);
+          gl_PointSize = clamp(gl_PointSize, 0.65, 2.7);
         }
       `,
       fragmentShader: `
@@ -276,9 +276,9 @@ export class GalaxyGenerator {
           float intensity = (1.0 - smoothstep(0.0, 0.5, dist));
           intensity = pow(intensity, 2.0);
 
-          vec3 finalColor = vColor * intensity * vTwinkle * 0.25;
+          vec3 finalColor = vColor * intensity * vTwinkle * 0.22;
 
-          gl_FragColor = vec4(finalColor, intensity * 0.34);
+          gl_FragColor = vec4(finalColor, intensity * 0.32);
         }
       `,
       depthWrite: false,
@@ -287,7 +287,7 @@ export class GalaxyGenerator {
       transparent: true,
       uniforms: {
         uTime: { value: 0 },
-        uSize: { value: 2.8 * window.devicePixelRatio },
+        uSize: { value: 2.6 * window.devicePixelRatio },
         uSpeed: { value: this.parameters.speed }
       }
     });
