@@ -54,7 +54,7 @@ html, body {
   height: 100vh;
   pointer-events: none;
   z-index: 2;
-  background: radial-gradient(circle at 50% 50%, transparent 45%, rgba(2, 3, 8, 0.55) 75%, rgba(1, 2, 6, 0.94) 100%);
+  background: radial-gradient(circle at 50% 50%, transparent 62%, rgba(2, 3, 8, 0.35) 86%, rgba(1, 2, 6, 0.8) 100%);
 }
 
 /* 3D Projected Landmark Pins */

@@ -5,7 +5,6 @@ import { createControls } from './core/controls.js';
 import { GalaxyGenerator } from './galaxy/galaxyGenerator.js';
 import { DustGenerator } from './galaxy/dustGenerator.js';
 import { SagittariusA } from './galaxy/blackHole.js';
-import { LightPillar } from './galaxy/lightPillar.js';
 import { LandmarksManager } from './galaxy/landmarks.js';
 import { setupHUD } from './ui/hud.js';
 
@@ -23,7 +22,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // 3. OrbitControls & Camera FlyTo
   const controls = createControls(camera, renderer.domElement);
 
-  // 4. Spiral Galaxy Stars Generator (Chế độ ít sao thanh thoát)
+  // 4. Spiral Galaxy Stars Generator
   const galaxy = new GalaxyGenerator(scene);
 
   // 5. Interstellar Dust & Emission Nebulae
@@ -32,10 +31,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // 6. Central Black Hole
   const blackHole = new SagittariusA(scene);
 
-  // 7. Cột ánh sáng vũ trụ xuyên qua tâm Dải Ngân Hà
-  const lightPillar = new LightPillar(scene);
-
-  // 8. 3D Celestial Landmarks & Solar System Beacon
+  // 7. 3D Celestial Landmarks & Solar System Beacon
   const landmarks = new LandmarksManager(scene, camera, landmarksContainer, (item) => {
     if (item.cameraPreset) {
       controls.goToPreset(item.cameraPreset);
@@ -44,12 +40,11 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 9. Connect HUD & UI Event Listeners
+  // 8. Connect HUD & UI Event Listeners
   setupHUD({
     galaxy,
     dust,
     blackHole,
-    lightPillar,
     landmarks,
     controls,
     composer,
@@ -98,9 +93,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Update black hole accretion disk & relativistic jets
     blackHole.update(elapsedTime);
-
-    // Update cosmic light pillar
-    lightPillar.update(elapsedTime);
 
     // Update landmarks
     landmarks.update(elapsedTime);

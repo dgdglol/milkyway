@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 
 export function createScene(canvas) {
-  // Scene with deep velvety black cosmic void
+  // Scene with deep velvety black cosmic void (fog beyond the galaxy)
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x000103, 0.0008);
+  scene.fog = new THREE.FogExp2(0x000103, 0.0002);
 
   // Camera looking at galaxy
   const camera = new THREE.PerspectiveCamera(
@@ -26,7 +26,7 @@ export function createScene(canvas) {
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 0.72; // Tone tối đằm, sâu thẳm, không bao giờ bị chói
+  renderer.toneMappingExposure = 0.85; // Giữ độ sáng đằm thắm, không bị sụt tối thành mảng đen
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   // Background deep space stars (nhẹ nhàng, mờ ảo xa xôi)

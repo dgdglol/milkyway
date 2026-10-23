@@ -9,7 +9,7 @@ export const ARM_PROFILES = [
     name: 'Nhánh Perseus',
     baseAngle: 0.05,
     spinFactor: 1.0,
-    width: (r, ratio) => 6.2 + Math.sin(r * 0.11) * 3.6 + ratio * 4.6,
+    width: (r, ratio) => 7.5 + Math.sin(r * 0.11) * 4.2 + ratio * 5.5,
     colors: [
       new THREE.Color('#caa25b'), // Vàng cát ấm
       new THREE.Color('#7893b8'), // Lam xám thiên văn
@@ -20,7 +20,7 @@ export const ARM_PROFILES = [
     name: 'Nhánh Sagittarius-Carina',
     baseAngle: 1.34, // Góc lệch tự nhiên
     spinFactor: 1.05,
-    width: (r, ratio) => 4.4 + Math.cos(r * 0.16) * 2.2 + ratio * 2.8,
+    width: (r, ratio) => 5.6 + Math.cos(r * 0.16) * 2.8 + ratio * 3.6,
     colors: [
       new THREE.Color('#d4a95d'), // Hổ phách ấm
       new THREE.Color('#a8864f'), // Topaz trầm
@@ -31,7 +31,7 @@ export const ARM_PROFILES = [
     name: 'Nhánh Scutum-Centaurus',
     baseAngle: 2.86, // Nhánh chính khổng lồ, dải mây dày cuộn sóng
     spinFactor: 0.98,
-    width: (r, ratio) => 8.8 + Math.sin(r * 0.09 + 0.5) * 4.8 + ratio * 5.4,
+    width: (r, ratio) => 10.5 + Math.sin(r * 0.09 + 0.5) * 5.4 + ratio * 6.5,
     colors: [
       new THREE.Color('#deb86e'), // Champagne ấm
       new THREE.Color('#b88b44'), // Vàng mật ong
@@ -43,7 +43,7 @@ export const ARM_PROFILES = [
     name: 'Nhánh Norma / Outer',
     baseAngle: 4.65, // Nhánh ngoại vi, mảnh ở trong và tỏa rộng ra viền ngoài
     spinFactor: 1.04,
-    width: (r, ratio) => 4.0 + Math.pow(ratio, 1.3) * 8.8 + Math.sin(r * 0.13) * 2.4,
+    width: (r, ratio) => 5.2 + Math.pow(ratio, 1.3) * 10.5 + Math.sin(r * 0.13) * 3.0,
     colors: [
       new THREE.Color('#9e7e4e'), // Cát vàng sẫm
       new THREE.Color('#4d6585'), // Lam xám
@@ -85,28 +85,28 @@ export class DustGenerator {
     }
     this.materials = [];
 
-    // 1. MÂY Ở GIỮA: Vùng nhân & thanh chắn elip siêu dày dặn, màu vàng mật ong và champagne ấm
+    // 1. MÂY Ở GIỮA: Vùng nhân & thanh chắn elip cực dày, vàng ấm mịn màng
     this.createGoldenCoreBulge();
 
-    // 2. MÂY MỜ GIỮA CÁC DẢI & KHẮP ĐĨA: Lớp sương mù vũ trụ dày đặc xóa tan mọi khoảng trống
+    // 2. MÂY PHỦ KÍN TOÀN ĐĨA (Inter-Arm Deep Carpet): Xóa sạch mọi mảng đen bên trong thiên hà
     this.createInterArmDeepCarpet();
 
-    // 3. MÂY DẢI XOẮN ỐC DÀY ĐẶC: Các dòng sông mây cuộn sóng bồng bềnh
+    // 3. MÂY DẢI XOẮN ỐC DÀY ĐẶC (Dense Arm Ribbons): Cuộn sóng dày dặn, bồng bềnh
     this.createDenseArmCloudRibbons();
 
-    // 4. MÂY MỜ XUNG QUANH (Outer Halo Mist): Phủ rộng ra rìa ngoài đĩa thiên hà
+    // 4. MÂY MỜ XUNG QUANH (Outer Halo Mist): Phủ rộng viền ngoài, triệt tiêu mảng đen ngoại vi
     this.createOuterHaloMist();
 
-    // 5. CÁC NHÁNH PHỤ CẦU NỐI (Spurs & Inter-Arm Bridges): Đan xen giữa các nhánh
+    // 5. CÁC NHÁNH PHỤ CẦU NỐI (Spurs & Inter-Arm Bridges)
     this.createSpurBridges();
 
     // 6. ĐỐM HỒNG NGỌC MỜ HII (Deep Red Nebulae)
     this.createDeepHIINebulae();
   }
 
-  // 1. MÂY Ở GIỮA: Vùng nhân elip Sagittarius A* màu vàng ấm áp
+  // 1. MÂY Ở GIỮA: Vùng nhân elip Sagittarius A* màu vàng kem champagne ấm dịu
   createGoldenCoreBulge() {
-    const count = 28000;
+    const count = 35000;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const scales = new Float32Array(count);
@@ -127,11 +127,11 @@ export class DustGenerator {
 
       const u = (Math.random() - 0.5) * 2;
       const v = (Math.random() - 0.5) * 2;
-      const lx = u * 19.0 * Math.sqrt(Math.max(0, 1 - (v * v) / 1.4));
-      const lz = v * 7.2 * Math.sqrt(Math.max(0, 1 - (u * u) / 1.4));
+      const lx = u * 21.0 * Math.sqrt(Math.max(0, 1 - (v * v) / 1.4));
+      const lz = v * 8.2 * Math.sqrt(Math.max(0, 1 - (u * u) / 1.4));
 
       positions[i3] = lx * cosBar - lz * sinBar;
-      positions[i3 + 1] = (Math.random() - 0.5) * 3.2;
+      positions[i3 + 1] = (Math.random() - 0.5) * 3.6;
       positions[i3 + 2] = lx * sinBar + lz * cosBar;
 
       const c = coreGoldColors[Math.floor(Math.random() * coreGoldColors.length)];
@@ -139,7 +139,8 @@ export class DustGenerator {
       colors[i3 + 1] = c.g;
       colors[i3 + 2] = c.b;
 
-      scales[i] = 16.0 + Math.random() * 24.0;
+      // Hạt mây to rộng, che phủ kín tuyệt đối
+      scales[i] = 20.0 + Math.random() * 28.0;
     }
 
     const geo = new THREE.BufferGeometry();
@@ -169,9 +170,9 @@ export class DustGenerator {
           vec4 mvPos = modelViewMatrix * vec4(rotatedPos, 1.0);
           gl_Position = projectionMatrix * mvPos;
 
-          vAlpha = 0.35 + sin(uTime * 0.6 + dist * 0.15) * 0.04;
-          gl_PointSize = aScale * (125.0 / -mvPos.z);
-          gl_PointSize = clamp(gl_PointSize, 2.0, 54.0);
+          vAlpha = 0.42 + sin(uTime * 0.6 + dist * 0.15) * 0.04;
+          gl_PointSize = aScale * (130.0 / -mvPos.z);
+          gl_PointSize = clamp(gl_PointSize, 4.0, 72.0);
         }
       `,
       fragmentShader: `
@@ -182,8 +183,8 @@ export class DustGenerator {
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
           float strength = 1.0 - smoothstep(0.0, 0.5, dist);
-          strength = pow(strength, 1.35);
-          gl_FragColor = vec4(vColor * 0.50, strength * vAlpha);
+          strength = pow(strength, 1.2);
+          gl_FragColor = vec4(vColor * 0.52, strength * vAlpha);
         }
       `,
       depthWrite: false,
@@ -201,38 +202,38 @@ export class DustGenerator {
     this.group.add(this.barClouds);
   }
 
-  // 2. MÂY MỜ GIỮA CÁC DẢI & KHẮP ĐĨA: Siêu nhiều mây mờ mềm mại lấp đầy mọi khoảng trống
+  // 2. MÂY PHỦ KÍN TOÀN ĐĨA: Triệt tiêu mọi mảng đen giữa các nhánh và đĩa thiên hà
   createInterArmDeepCarpet() {
-    const count = 65000;
+    const count = 85000;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const scales = new Float32Array(count);
 
-    // Bảng màu mây mờ: hổ phách khói và cát vàng ở trong, lam xám thiên văn ở ngoài
+    // Chuyển sắc từ vàng cát / hổ phách ấm ở trong sang lam xám thiên văn ở ngoài
     const innerColors = [
-      new THREE.Color('#423422'), // Hổ phách khói
-      new THREE.Color('#382b1c'), // Cát vàng sẫm
-      new THREE.Color('#4a3c26')  // Vàng nâu ấm
+      new THREE.Color('#463824'), // Hổ phách khói
+      new THREE.Color('#3c2f1e'), // Cát vàng sẫm
+      new THREE.Color('#504028')  // Vàng nâu ấm
     ];
 
     const outerColors = [
-      new THREE.Color('#222d3d'), // Lam xám thiên văn
-      new THREE.Color('#2b384c'), // Slate blue tối
-      new THREE.Color('#1e2838')  // Xám đêm sâu
+      new THREE.Color('#253244'), // Lam xám thiên văn
+      new THREE.Color('#2e3d52'), // Slate blue tối
+      new THREE.Color('#222d3d')  // Xám đêm sâu
     ];
 
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
 
-      // Phủ kín khắp đĩa từ r = 2.5 đến 128
-      const r = 2.5 + Math.pow(Math.random(), 1.25) * 125.5;
+      // Phủ kín tuyệt đối từ tâm r = 1.0 đến r = 130
+      const r = 1.0 + Math.pow(Math.random(), 1.2) * 129.0;
       const angle = Math.random() * Math.PI * 2;
 
       positions[i3] = Math.cos(angle) * r;
-      positions[i3 + 1] = (Math.random() - 0.5) * (2.4 + (r / 125.0) * 3.8);
+      positions[i3 + 1] = (Math.random() - 0.5) * (2.8 + (r / 128.0) * 4.2);
       positions[i3 + 2] = Math.sin(angle) * r;
 
-      const isInner = (r < 56.0) || (Math.random() < Math.max(0, 1 - r / 80.0));
+      const isInner = (r < 58.0) || (Math.random() < Math.max(0, 1 - r / 85.0));
       const pool = isInner ? innerColors : outerColors;
       const c = pool[Math.floor(Math.random() * pool.length)];
 
@@ -240,8 +241,8 @@ export class DustGenerator {
       colors[i3 + 1] = c.g;
       colors[i3 + 2] = c.b;
 
-      // Hạt mây mờ to rộng, hòa lẫn cực kỳ mượt mà
-      scales[i] = 26.0 + Math.random() * 34.0;
+      // Kích thước hạt cực rộng để các hạt chồng lấn liên tục, không để lọt mảng đen
+      scales[i] = 34.0 + Math.random() * 42.0;
     }
 
     const geo = new THREE.BufferGeometry();
@@ -271,11 +272,12 @@ export class DustGenerator {
           vec4 mvPos = modelViewMatrix * vec4(rotatedPos, 1.0);
           gl_Position = projectionMatrix * mvPos;
 
-          float fade = 1.0 - smoothstep(45.0, 128.0, dist);
-          vAlpha = (0.24 + sin(uTime * 0.35 + dist * 0.08) * 0.02) * fade;
+          // Mây phủ dày đằm, triệt tiêu mảng đen
+          float fade = 1.0 - smoothstep(50.0, 132.0, dist);
+          vAlpha = (0.36 + sin(uTime * 0.35 + dist * 0.08) * 0.03) * fade;
 
-          gl_PointSize = aScale * (120.0 / -mvPos.z);
-          gl_PointSize = clamp(gl_PointSize, 2.0, 58.0);
+          gl_PointSize = aScale * (125.0 / -mvPos.z);
+          gl_PointSize = clamp(gl_PointSize, 5.0, 95.0);
         }
       `,
       fragmentShader: `
@@ -285,9 +287,10 @@ export class DustGenerator {
         void main() {
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
+          // Độ suy giảm hình chuông mềm, kết nối liền mạch giữa các hạt
           float strength = 1.0 - smoothstep(0.0, 0.5, dist);
-          strength = pow(strength, 1.4);
-          gl_FragColor = vec4(vColor * 0.45, strength * vAlpha);
+          strength = pow(strength, 1.15);
+          gl_FragColor = vec4(vColor * 0.50, strength * vAlpha);
         }
       `,
       depthWrite: false,
@@ -305,10 +308,10 @@ export class DustGenerator {
     this.group.add(this.interArmClouds);
   }
 
-  // 3. MÂY DẢI XOẮN ỐC DÀY ĐẶC (Dense Arm Cloud Ribbons: cuộn sóng bồng bềnh)
+  // 3. MÂY DẢI XOẮN ỐC DÀY ĐẶC (Dense Arm Ribbons)
   createDenseArmCloudRibbons() {
-    const count = 58000;
-    const radius = 122;
+    const count = 68000;
+    const radius = 124;
     const baseSpin = 1.65;
 
     const positions = new Float32Array(count * 3);
@@ -323,7 +326,7 @@ export class DustGenerator {
       const arm = ARM_PROFILES[armIndex];
 
       const rRatio = Math.pow(Math.random(), 1.6);
-      const r = 6.5 + rRatio * radius;
+      const r = 5.5 + rRatio * radius;
 
       const spinAngle = r * baseSpin * arm.spinFactor * 0.054 + Math.sin(r * 0.08) * 0.12;
       const angle = arm.baseAngle + spinAngle;
@@ -332,10 +335,10 @@ export class DustGenerator {
       positions[i3 + 1] = 0;
       positions[i3 + 2] = Math.sin(angle) * r;
 
-      const armSpread = arm.width(r, rRatio);
+      const armSpread = arm.width(r, rRatio) * 1.15;
       const randomRadial = (Math.pow(Math.random(), 1.4) - 0.5) * armSpread;
-      const randomTangent = (Math.random() - 0.5) * armSpread * 0.65;
-      const randomY = (Math.random() - 0.5) * (1.8 + rRatio * 2.6);
+      const randomTangent = (Math.random() - 0.5) * armSpread * 0.7;
+      const randomY = (Math.random() - 0.5) * (2.0 + rRatio * 2.8);
 
       const sinA = Math.sin(angle);
       const cosA = Math.cos(angle);
@@ -348,7 +351,7 @@ export class DustGenerator {
       colors[i3 + 1] = c.g;
       colors[i3 + 2] = c.b;
 
-      scales[i] = 16.0 + Math.random() * 26.0;
+      scales[i] = 20.0 + Math.random() * 30.0;
     }
 
     const geo = new THREE.BufferGeometry();
@@ -382,9 +385,9 @@ export class DustGenerator {
           vec4 mvPos = modelViewMatrix * vec4(finalPos, 1.0);
           gl_Position = projectionMatrix * mvPos;
 
-          vAlpha = 0.32 + sin(uTime * 0.5 + dist * 0.09) * 0.04;
+          vAlpha = 0.40 + sin(uTime * 0.5 + dist * 0.09) * 0.04;
           gl_PointSize = aScale * (125.0 / -mvPos.z);
-          gl_PointSize = clamp(gl_PointSize, 2.0, 52.0);
+          gl_PointSize = clamp(gl_PointSize, 4.0, 75.0);
         }
       `,
       fragmentShader: `
@@ -395,8 +398,8 @@ export class DustGenerator {
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
           float strength = 1.0 - smoothstep(0.0, 0.5, dist);
-          strength = pow(strength, 1.35);
-          gl_FragColor = vec4(vColor * 0.50, strength * vAlpha);
+          strength = pow(strength, 1.25);
+          gl_FragColor = vec4(vColor * 0.52, strength * vAlpha);
         }
       `,
       depthWrite: false,
@@ -414,29 +417,29 @@ export class DustGenerator {
     this.group.add(this.armClouds);
   }
 
-  // 4. MÂY MỜ XUNG QUANH (Outer Halo Mist: Phủ rộng rìa ngoài đĩa)
+  // 4. MÂY MỜ XUNG QUANH (Outer Halo Mist: Phủ kín rìa ngoài)
   createOuterHaloMist() {
-    const count = 22000;
+    const count = 30000;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const scales = new Float32Array(count);
 
     const haloColors = [
-      new THREE.Color('#1c2533'),
-      new THREE.Color('#222d3d'),
-      new THREE.Color('#293444'),
-      new THREE.Color('#18202c')
+      new THREE.Color('#202b3a'),
+      new THREE.Color('#263446'),
+      new THREE.Color('#2d3c4e'),
+      new THREE.Color('#1c2636')
     ];
 
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
 
-      // Bao phủ vùng rìa ngoài r = 60 đến 140
-      const r = 60.0 + Math.pow(Math.random(), 1.1) * 80.0;
+      // Phủ đều khắp rìa ngoài r = 45 đến 142
+      const r = 45.0 + Math.pow(Math.random(), 1.1) * 97.0;
       const angle = Math.random() * Math.PI * 2;
 
       positions[i3] = Math.cos(angle) * r;
-      positions[i3 + 1] = (Math.random() - 0.5) * (3.0 + (r / 140.0) * 4.5);
+      positions[i3 + 1] = (Math.random() - 0.5) * (3.2 + (r / 140.0) * 4.8);
       positions[i3 + 2] = Math.sin(angle) * r;
 
       const c = haloColors[Math.floor(Math.random() * haloColors.length)];
@@ -444,7 +447,7 @@ export class DustGenerator {
       colors[i3 + 1] = c.g;
       colors[i3 + 2] = c.b;
 
-      scales[i] = 30.0 + Math.random() * 38.0;
+      scales[i] = 36.0 + Math.random() * 45.0;
     }
 
     const geo = new THREE.BufferGeometry();
@@ -474,11 +477,11 @@ export class DustGenerator {
           vec4 mvPos = modelViewMatrix * vec4(rotatedPos, 1.0);
           gl_Position = projectionMatrix * mvPos;
 
-          float fade = 1.0 - smoothstep(80.0, 142.0, dist);
-          vAlpha = (0.20 + sin(uTime * 0.3 + dist * 0.06) * 0.02) * fade;
+          float fade = 1.0 - smoothstep(75.0, 144.0, dist);
+          vAlpha = (0.28 + sin(uTime * 0.3 + dist * 0.06) * 0.02) * fade;
 
-          gl_PointSize = aScale * (120.0 / -mvPos.z);
-          gl_PointSize = clamp(gl_PointSize, 2.0, 60.0);
+          gl_PointSize = aScale * (125.0 / -mvPos.z);
+          gl_PointSize = clamp(gl_PointSize, 4.0, 85.0);
         }
       `,
       fragmentShader: `
@@ -489,8 +492,8 @@ export class DustGenerator {
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
           float strength = 1.0 - smoothstep(0.0, 0.5, dist);
-          strength = pow(strength, 1.5);
-          gl_FragColor = vec4(vColor * 0.40, strength * vAlpha);
+          strength = pow(strength, 1.3);
+          gl_FragColor = vec4(vColor * 0.44, strength * vAlpha);
         }
       `,
       depthWrite: false,
@@ -510,7 +513,7 @@ export class DustGenerator {
 
   // 5. NHÁNH CẦU NỐI PHỤ (Spurs & Inter-Arm Bridges)
   createSpurBridges() {
-    const count = 10000;
+    const count = 12000;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
     const scales = new Float32Array(count);
@@ -525,20 +528,20 @@ export class DustGenerator {
       const i3 = i * 3;
 
       const t = Math.random();
-      const r = 28.0 + t * 62.0;
+      const r = 25.0 + t * 68.0;
       const baseArm = ARM_PROFILES[i % ARM_PROFILES.length];
       const bridgeAngle = baseArm.baseAngle + r * 1.65 * 0.054 + (Math.random() * 0.45 + 0.15);
 
-      positions[i3] = Math.cos(bridgeAngle) * r + (Math.random() - 0.5) * 4.8;
-      positions[i3 + 1] = (Math.random() - 0.5) * 2.4;
-      positions[i3 + 2] = Math.sin(bridgeAngle) * r + (Math.random() - 0.5) * 4.8;
+      positions[i3] = Math.cos(bridgeAngle) * r + (Math.random() - 0.5) * 5.2;
+      positions[i3 + 1] = (Math.random() - 0.5) * 2.6;
+      positions[i3 + 2] = Math.sin(bridgeAngle) * r + (Math.random() - 0.5) * 5.2;
 
       const c = spurHues[Math.floor(Math.random() * spurHues.length)];
       colors[i3] = c.r;
       colors[i3 + 1] = c.g;
       colors[i3 + 2] = c.b;
 
-      scales[i] = 14.0 + Math.random() * 22.0;
+      scales[i] = 16.0 + Math.random() * 26.0;
     }
 
     const geo = new THREE.BufferGeometry();
@@ -568,9 +571,9 @@ export class DustGenerator {
           vec4 mvPos = modelViewMatrix * vec4(rotatedPos, 1.0);
           gl_Position = projectionMatrix * mvPos;
 
-          vAlpha = 0.24 + sin(uTime * 0.5 + dist * 0.1) * 0.03;
+          vAlpha = 0.30 + sin(uTime * 0.5 + dist * 0.1) * 0.03;
           gl_PointSize = aScale * (120.0 / -mvPos.z);
-          gl_PointSize = clamp(gl_PointSize, 2.0, 44.0);
+          gl_PointSize = clamp(gl_PointSize, 3.0, 50.0);
         }
       `,
       fragmentShader: `
@@ -581,8 +584,8 @@ export class DustGenerator {
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
           float strength = 1.0 - smoothstep(0.0, 0.5, dist);
-          strength = pow(strength, 1.4);
-          gl_FragColor = vec4(vColor * 0.45, strength * vAlpha);
+          strength = pow(strength, 1.3);
+          gl_FragColor = vec4(vColor * 0.48, strength * vAlpha);
         }
       `,
       depthWrite: false,
@@ -602,8 +605,8 @@ export class DustGenerator {
 
   // 6. VƯỜN ƯƠM SAO ĐỎ TRẦM HII (Deep Red Emission Nebulae)
   createDeepHIINebulae() {
-    const count = 1200;
-    const radius = 108;
+    const count = 1500;
+    const radius = 112;
 
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
@@ -621,20 +624,20 @@ export class DustGenerator {
 
       const arm = ARM_PROFILES[i % ARM_PROFILES.length];
       const rRatio = Math.pow(Math.random(), 1.6);
-      const r = 9 + rRatio * radius;
+      const r = 8 + rRatio * radius;
       const spinAngle = r * 1.65 * arm.spinFactor * 0.054;
       const angle = arm.baseAngle + spinAngle;
 
-      positions[i3] = Math.cos(angle) * r + (Math.random() - 0.5) * 3.5;
-      positions[i3 + 1] = (Math.random() - 0.5) * 1.4;
-      positions[i3 + 2] = Math.sin(angle) * r + (Math.random() - 0.5) * 3.5;
+      positions[i3] = Math.cos(angle) * r + (Math.random() - 0.5) * 3.8;
+      positions[i3 + 1] = (Math.random() - 0.5) * 1.5;
+      positions[i3 + 2] = Math.sin(angle) * r + (Math.random() - 0.5) * 3.8;
 
       const c = redHues[Math.floor(Math.random() * redHues.length)];
       colors[i3] = c.r;
       colors[i3 + 1] = c.g;
       colors[i3 + 2] = c.b;
 
-      scales[i] = 10.0 + Math.random() * 16.0;
+      scales[i] = 12.0 + Math.random() * 18.0;
     }
 
     const geo = new THREE.BufferGeometry();
@@ -664,9 +667,9 @@ export class DustGenerator {
           vec4 mvPos = modelViewMatrix * vec4(rotatedPos, 1.0);
           gl_Position = projectionMatrix * mvPos;
 
-          vAlpha = 0.26 + sin(uTime * 1.5 + dist * 0.3) * 0.05;
+          vAlpha = 0.28 + sin(uTime * 1.5 + dist * 0.3) * 0.05;
           gl_PointSize = aScale * (115.0 / -mvPos.z);
-          gl_PointSize = clamp(gl_PointSize, 1.0, 36.0);
+          gl_PointSize = clamp(gl_PointSize, 2.0, 42.0);
         }
       `,
       fragmentShader: `
@@ -677,8 +680,8 @@ export class DustGenerator {
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
           float strength = 1.0 - smoothstep(0.0, 0.5, dist);
-          strength = pow(strength, 1.6);
-          gl_FragColor = vec4(vColor * 0.45, strength * vAlpha);
+          strength = pow(strength, 1.5);
+          gl_FragColor = vec4(vColor * 0.48, strength * vAlpha);
         }
       `,
       depthWrite: false,
